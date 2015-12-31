@@ -1,0 +1,17 @@
+= Sfera
+:author: Marcos Cruz (programandala.net)
+
+// This file is part of Sfera, a library for QL SUPERFORTH
+// http://programandala.net/en.program.sfera.html
+
+// You may do whatever you want with this work, so long as you retain
+// all the copyright/authorship/acknowledgment/credits notice(s) and
+// this license in all redistributed copies and derived works.  There
+// is no warranty.
+
+Sfera is a library under development for QL SUPERFORTH.
+
+- http://programandala.net/en.program.sfera.html[Sfera homepage]
+- http://programandala.net/en.program.sfera.history.html[Sfera
+  development history]
+
