@@ -1,7 +1,7 @@
 ( boot.fs )
 
 ( This file is part of Sfera, a library for QL SUPERFORTH )
-( Version: 0.0.0+201512312310)
+( Version: 0.0.0+201601010525 )
 ( http://programandala.net/en.program.sfera.html )
 
 ( Author: Marcos Cruz [programandala.net] )
@@ -49,7 +49,15 @@ LOWER
 \ ----------------------------------------------
 \ Operators
 
-: 0<>  ( x1 x2 -- f )  = 0=  ;
+: 0<>  ( x -- f )  0 <>  ;
+
+ 0 dup constant false
+   dup constant [false] immediate
+0= dup constant true
+       constant [true] immediate
+
+: on  ( a -- )  true swap !  ;
+: off  ( a -- )  false swap !  ;
 
 \ ----------------------------------------------
 \ Word headers
@@ -70,8 +78,11 @@ LOWER
 : name>link   ( nfa -- lfa )  cell-  ;
 : name>body   ( nfa -- pfa )  name> >body  ;
 : >link       ( cfa -- lfa )  >name name>link  ;
+: link>name   ( lfa -- nfa )  cell+  ;
+: link>       ( lfa -- ffa )  link>name name>  ;
 : body>       ( pfa -- cfa )  cell-  ;
 : body>name   ( pfa -- nfa )  body> >name  ;
+: body>link   ( pfa -- lfa )  body>name name>link  ;
 
 : executing?  ( -- f )  state @ 0=  ;
 : compiling?  ( -- f )  executing? 0=  ;
@@ -124,6 +135,45 @@ LOWER
   c# " word dup count pad swap cmove c@ pad swap ;
 
 \ ==============================================================
+\ Keyboard
+
+: shift-key?  ( -- f )  7 keyrow 1 and 0<>  ;
+: space-key?  ( -- f )  1 keyrow 64 and 0<>  ;
+: break-key?  ( -- f )  shift-key? space-key? and  ;
+
+: key?  ( -- f )
+  0  8 0 do  i keyrow or  loop  0<>  ;
+
+  \ XXX FIXME
+: inkey  ( -- c )
+  timeout >r
+   1 [ ' timeout >body ] literal !  key
+  r> [ ' timeout >body ] literal !  ;
+
+: aborted?  ( c -- f )
+  key? if  key =  else  drop false  then  ;
+  \ If no key is pressed return _false_.  If a key is pressed,
+  \ discard it and wait for a second key. Ther return _true_ if
+  \ it's _c_, else return _false_.
+
+  \ Usage example:
+  \
+  \ : listing  ( -- )
+  \   begin  ." bla "  bl aborted?  until  ." Aborted"  ;
+
+10 constant 'cr' \ code of carriage return
+
+: nuf?  ( -- f )  'cr' aborted?  ;
+
+252 constant break-key
+
+  \ XXX FIXME -- never returns, why?
+: no-key  ( -- )  begin  key? 0=  until  ;
+
+: enough?  ( -- f )
+  break-key? if  no-key key break-key =  else  false  then  ;
+
+\ ==============================================================
 \ Tools
 
 : binary  ( -- )  2 base !  ;
@@ -143,18 +193,28 @@ variable base'
 : 16hex.   ( n -- ) s->d 4 (dhex.)  ;
 : 8hex.    ( b -- ) s->d 2 (dhex.)  ;
 
+: first-word?  ( lfa1 -- lfa2 f )  @ dup 32768 =  ;
+
 : words  ( -- )
   latest ( lfa )
   begin
     dup id. space
-    @ dup 32768 =  \ last?
+    first-word?  enough? or
   until  drop  ;
 
 : xwords  ( -- )
   latest ( lfa )
   begin
-    dup link> 16hex dup id. space
-    @ dup 32768 =  \ last?
+    dup link> 16hex. dup id. space
+    first-word?  enough? or
+  until  drop  ;
+
+  \ XXX TODO
+: find-cfa  ( cfa -- )
+  latest ( lfa )
+  begin
+    dup link> 16hex. dup id. space
+    first-word?  enough? or
   until  drop  ;
 
 : .n  ( cfa -- )  >link id.  ;
@@ -271,136 +331,160 @@ nfa4_
 \ Files
 
 : include  ( "name" -- )
-  cr .s \ XXX INFORMER
-  \ #in 2@ >r >r
+  cr .s key drop \ XXX INFORMER
+  #in 2@ >r >r
+  cr .s key drop \ XXX INFORMER
+  #out 2@ >r >r
+  cr .s key drop \ XXX INFORMER
   #file 2@ >r >r
+  cr .s key drop \ XXX INFORMER
   load_file  \ XXX FIXME does nothing
+  cr .s key drop \ XXX INFORMER
   \ XXX FIXME the channels are wrong
   r> r> #file 2!
-  \ r> r> #in 2!
+  cr .s key drop \ XXX INFORMER
+  r> r> #out 2!
+  cr .s key drop \ XXX INFORMER
+  r> r> #in 2!
+  cr .s key drop \ XXX INFORMER
   ;
 
-end_file \ XXX TMP
+\ ==============================================================
+\ Number prefixes
+
+  \ Credits:
+  \
+  \ Code modified from the Solo Forth library.
+  \ Original code adapted from eForth.
+
+exvec: adjust-number  ( d -- d | n )
+
+: single-number-prefix  ( -- )
+  assign adjust-number to-do drop  ;
+
+: double-number-prefix  ( -- )
+  assign adjust-number to-do noop  ;
+
+: numeric-prefix  ( b "name" -- )
+  create c, immediate
+  does>  ( "name" -- d | n ) ( pfa )
+    base @ >r  c@ base !
+    parse-word number adjust-number postpone literal
+    r> base !  ;
+
+: 2numeric-prefix  ( b "name" -- )
+  double-number-prefix numeric-prefix single-number-prefix  ;
+
+ 2 numeric-prefix b# ( "name" -- n )
+10 numeric-prefix d# ( "name" -- n )
+16 numeric-prefix h# ( "name" -- n )
+
+ 2 2numeric-prefix 2b# ( "name" -- d )
+10 2numeric-prefix 2d# ( "name" -- d )
+16 2numeric-prefix 2h# ( "name" -- d )
 
 \ ==============================================================
 \ Decode
 
-  \ XXX OLD -- ITC version
-
-  \ This file is part of Solo Forth
+  \ Adapted from Solo Forth
   \ http://programandala.net/en.program.solo_forth.html
 
-forth definitions decimal
+forth definitions decimal hex
 
-need name>body  need case  need [if]
+variable decode-level  decode-level off
+  \ depth of nesting
 
-variable decode-level  decode-level off \ depth of nesting
-variable decode-address  \ in the word being decoded
+variable decode-address
+  \ in the word being decoded
+
+83AC constant (loop)-cfa
+83B8 constant (+loop)-cfa
+8824 constant lit-cfa
+87C6 constant do-colon
+
+\ ----------------------------------------------
+\ Printing
 
 : indent  ( -- )
-  cr decode-address @ u. decode-level @ 2 * spaces  ;
+  cr decode-address @ u. decode-level @ 02 * spaces  ;
 
-: indent+  ( -- )  1 decode-level +! indent  ;
+: indent+  ( -- )  01 decode-level +! indent  ;
 
-  \ Special cases
+\ ----------------------------------------------
+\ Special cases
 
 : decode-branch    ( a1 -- a2 )  cell+ dup @ u.  ;
 
 : decode-literal   ( a1 -- a2 )  cell+ dup @ .  ;
 
-: decode-cliteral  ( a1 -- a2 )  cell+ dup c@ . 1-  ;
-
-: decode-sliteral  ( a1 -- a2 )
-  cell+ dup count type  dup c@ + 1-  ;
-
 : decode-compile   ( a1 -- a2 )
-  cell+ dup @ cell+ body>name id.  ;
+  cell+ dup @ cell+ body>link id.  ;
 
-  \ Special cases dispatcher
+\ ----------------------------------------------
+\ Special cases dispatcher
 
 : decode-special  ( a1 -- a1 | a2 )
 
   dup @ case
 
     ['] compile   of  decode-compile    endof
-    ['] lit       of  decode-literal    endof
-    ['] clit      of  decode-cliteral   endof
-    ['] slit      of  decode-sliteral   endof
+    lit-cfa       of  decode-literal    endof
     ['] branch    of  decode-branch     endof
-    ['] 0branch   of  decode-branch     endof
     ['] ?branch   of  decode-branch     endof
-
-    [defined] -branch [if]
-      ['] -branch   of  decode-branch     endof  [then]
-
-    \ XXX OLD -- for fig-Forth `do loop`:
-    \ ['] (loop)    of  decode-branch     endof
-    \ ['] (+loop)   of  decode-branch     endof
-
-    \ XXX NEW -- for Forth-83 `do loop`:
-    ['] (do)      of  decode-branch     endof
-    ['] (?do)     of  decode-branch     endof
-
-    ['] (.")      of  decode-sliteral   endof
+    (loop)-cfa    of  decode-branch     endof
+    (+loop)-cfa   of  decode-branch     endof
 
   endcase  ;
 
-( itc-decode )
+\ ----------------------------------------------
+\ Checks of the main code
 
-  \ Checks of the main code
+: decode-end?  ( cfa -- f )
+  ['] exit =  ;
+  \ Is the given cfa the end of a definition?
 
-: decode-end?  ( xt -- f )
-  \ Is the given xt the end of a definition?
-  dup  ['] exit =  swap ['] (;code) =  or  ;
-
-: colon-pfa?  ( pfa -- f )
+: colon-definition?  ( cfa -- f )
+  @ do-colon =  ;
   \ Is the given pfa a colon definition?
-  body> @ ['] : @ =  ;
 
-  \ Main code
+\ ----------------------------------------------
+\ Main
 
+  \ XXX FIXME
 : (decode)  ( pfa -- )
-
+  dup body> colon-definition? if
+    dup body> decode-address !
+    indent  ." : " dup body>link id.
+    begin   ( pfa+n ) dup decode-address !
+            dup @ dup ( pfa+n cfa cfa ) decode-end? 0=
+            \ ( pfa+n cfa f )
+    while  \ high level & not end of colon definition
+      \ ( pfa+n cfa )
+      cell+ ( pfa+n pfa' ) dup indent+  body>link id.
+      key case  c# q  of  sp! quit  endof \ q
+                  bl  of  drop      endof \ space
+                             swap recurse \ default
+          endcase  decode-special
+      cell+  -01 decode-level +!
+    repeat  indent cell+ body>link id. \ show the last word
+  else  ." Not a colon definition."
+  then  drop  ;
   \ Decode the definition at the given pfa.
 
-  dup colon-pfa? if
-    dup body> decode-address ! indent  ." : " dup body>name id.
-    begin   ( pfa+n ) dup decode-address !
-            dup @ dup ( pfa+n xt xt ) decode-end? 0=
-            \ ( pfa+n xt f )
-    while  \ high level & not end of colon definition
-      \ ( pfa+n xt )
-      cell+ ( pfa+n pfa' ) dup indent+  body>name id.
-      key case  [char] q  of  sp0 @ sp! quit  endof \ q
-                      bl  of  drop            endof \ space
-                                 swap recurse \ default
-          endcase  decode-special
-      cell+  -1 decode-level +!
-    repeat  indent cell+ body>name id. \ show the last word
-  else  ." Not a colon definition."  then  drop  ;  -->
 
-( itc-decode )
-
-  \ Interface
+\ ----------------------------------------------
+\ Interface
 
 : decode-usage  ( -- )
-     \  <------------------------------>
   cr ." Keys: space=more, q=quit, other=deeper." cr  ;
 
 : decode  ( "name" -- )
-  decode-usage
+  defined 0= 00 ?error
+  decode-usage  decode-level off  >body (decode)  ;
 
-  \ XXX OLD -- defined  ( "name" -- x 0 | xt 1 | xt -1 )
-  \ defined if  >body  0 decode-level !  (decode)
-  \         else  drop  -13 throw  then  ;
+decimal
 
-  \ XXX OLD -- defined  ( "name" -- ca len false | xt b true )
-  \ defined 0= -13 ?throw
-  \ drop >body  0 decode-level !  (decode)  ;
-
-  \ XXX NEW -- defined  ( "name" -- nt | 0 )
-  defined dup 0= -13 ?throw
-  name>body  0 decode-level !  (decode)  ;
+end_file \ XXX TMP
 
 \ ==============================================================
 \ XXX UNDER DEVELOPMENT
@@ -440,36 +524,14 @@ variable decode-address  \ in the word being decoded
 
 variable catcher
 
-: catch  ( xt -- exception# | 0 )
-  sp@ >r          ( xt )  \ save data stack pointer
-  catcher @ >r    ( xt )  \ save previous catcher
-  rp@ catcher !   ( xt )  \ set current catcher
+: catch  ( cfa -- exception# | 0 )
+  sp@ >r          ( cfa )  \ save data stack pointer
+  catcher @ >r    ( cfa )  \ save previous catcher
+  rp@ catcher !   ( cfa )  \ set current catcher
   execute         ( )     \ `execute` returns if no `throw`
   r> catcher !    ( )     \ restore previous catcher
   r> drop         ( )     \ discard saved stack pointer
   0  ;            ( 0 )   \ normal completion, no error
-
-\ ==============================================================
-\ Number prefixes
-
-
-\ XXX TODO evaluate catch throw
-
-  \ Credits:
-  \
-  \ Code from the Solo Forth library.
-  \ Original code adapted from eForth.
-
-: x# ( -- ) ( "ccc" -- n | d )
-  does> c@              \ new radix
-  base @ >r  base !     \ save and set radix
-  parse-name            \ get string
-  ['] evaluate catch    \ convert to number, set trap
-  r> base !  throw  ;   \ restore radix before error control
-
-create b# ( "name" -- n | d )  2 c, x# immediate
-create d# ( "name" -- n | d ) 10 c, x# immediate
-create h# ( "name" -- n | d ) 16 c, x# immediate
 
 end_file
 
