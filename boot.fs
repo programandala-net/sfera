@@ -33,12 +33,7 @@ LOWER  ( case-insensitive mode )
   10 word drop  ;  immediate
   \ Ignore the rest of the input stream line.
 
-: ?\  ( f "ccc<eol>" -- )
-  if  [compile] \
-  then  ; immediate
-  \ If _f_ is not zero, ignore the rest of the input stream line
-
-\  ;
+\ ============================================================ ;
 \ : Stack
 
 : nip  ( x1 x2 -- x2 )  swap drop  ;
@@ -55,11 +50,11 @@ LOWER  ( case-insensitive mode )
 \ ============================================================ ;
 \ : : Parsing
 
-: parse-word  ( "name" -- ca )  bl word  ;
+: bl-word  ( "name" -- ca )  bl word  ;
 
-: parse-name  ( "name" -- ca len )  parse-word count  ;
+: parse-name  ( "name" -- ca len )  bl-word count  ;
 
-: defined  ( "name" -- ca 0 | cfa 1 | cfa -1 )  parse-word find  ;
+: defined  ( "name" -- ca 0 | cfa 1 | cfa -1 )  bl-word find  ;
 
 : [undefined]  ( "name" -- f )  defined nip 0=  ; immediate
 : [defined]  ( "name" -- f )  [compile] [undefined] 0=  ; immediate
@@ -80,7 +75,38 @@ LOWER  ( case-insensitive mode )
 : compiling?  ( -- f )  executing? 0=  ;
 
 \ ============================================================ ;
+\ : Conditional compilation
+
+: ?\  ( f "ccc<eol>" -- )
+  if  [compile] \
+  then  ; immediate
+  \ If _f_ is not zero, ignore the rest of the input stream line
+
+str_const if$     "[if]"
+str_const else$   "[else]"
+str_const then$   "[then]"
+
+: [else]  ( "..." -- )
+
+  1 begin   bl-word dup count nip
+    while   dup if$ $==
+            if    drop 1+
+            else  dup else$ $==
+                  if    drop 1- dup if  1+  then
+                  else  then$ $== if  1-  then
+                  then
+            then  ?dup 0= if  exit  then
+    repeat  2drop  ; immediate
+
+: [if]  ( "..." -- )  0= if postpone [else] then  ; immediate
+
+: [then]  ( -- )  ; immediate
+
+\ ============================================================ ;
 \ : Address artithmetic
+
+: cell  ( -- n )
+  2 compiling? if  postpone literal  then  ; immediate
 
 : cell+  ( a1 -- a2 )
   compiling? if  postpone 2+  else  2+  then  ; immediate
@@ -185,7 +211,7 @@ exvec: adjust-number  ( d -- d | n )
   create c, immediate
   does>  ( "name" -- d | n ) ( pfa )
     base @ >r  c@ base !
-    parse-word number adjust-number postpone literal
+    bl-word number adjust-number postpone literal
     r> base !  ;
 
 : 2numeric-prefix  ( b "name" -- )
@@ -504,33 +530,267 @@ create_device nfa1_
 create_device nfa4_
 nfa4_
 
+
+\ ============================================================ ;
+\ : Values
+
+: value  ( n "name"  -- )  constant  ;
+
+: to  ( Interpretation: n "name" -- )
+      ( Compilation: "name" -- )
+  ' >body compiling? if    postpone literal postpone !
+                     else  !  then  ; immediate
+
+\ ============================================================ ;
+\ xstack
+
+  \ Credits:
+  \
+  \ Code adapted from Solo Forth.
+
+  \ Creation and core manipulation of xstacks
+
+0 value xsize  0 value xp  0 value xp0
+  \ Values of the current xstack:
+  \ xsize = size in address units (constant)
+  \ xp = address of the xstack pointer (variable)
+  \ xp0 = initial value of the xstack pointer (constant)
+
+: xstack  ( n "name" -- )
+  \ Create a new xstack of _n_ cells.
+  create
+    cells  \ size
+    here [ 3 cells cell- ] literal + dup  \ bottom and top
+    , , ,
+    \ +0 = xp0
+    \ +2 = xp
+    \ +4 = xsize
+    allot
+  does> ( -- )
+    \ Make an xstack the current one.
+    ( pfa ) dup @ to xp0  cell+ dup to xp  cell+ @ to xsize  ;
+
+: xp@  ( -- a )  xp @  ;
+
+: xp!  ( a -- )  xp !  ;
+
+: xp+!  ( n -- )  xp +!  ;
+
+: xclear  ( -- )  xp0 xp!  ;
+
+\ xstack single-number operations
+
+: >x  ( x -- ) ( X: -- x )  cell xp+!  xp@ !   ;
+
+: x@  ( -- x ) ( X: x -- x )  xp@ @  ;
+
+: xdrop  ( X: x -- )  [ cell negate ] literal xp+!  ;
+
+: x>  ( -- x ) ( X: x -- )  x@ xdrop  ;
+
+: xdup  ( X: x -- x x )  x@ >x  ;
+
+: xpick  ( n -- x'n ) ( X: x'n ... x'0 -- x'n ... x'0 )
+  xp@ swap cells - @  ;
+
+: xover  ( X: x1 x2 -- x1 x2 x1 )  1 xpick >x  ;
+
+\ xstack double-number operations
+
+: 2x@  ( -- x1 x2 ) ( X: x1 x2 -- x1 x2 )  x@ 1 xpick swap  ;
+
+: 2>x  ( x1 x2 -- ) ( X: -- x1 x2 )  swap >x >x  ;
+
+: 2x>  ( -- x1 x2 ) ( X: x1 x2 -- )  x> x> swap  ;
+
+: 2xdrop  ( X: x1 x2 -- )  [ -2 cells ] literal xp+!  ;
+
+: 2xdup  ( X: x1 x2 -- x1 x2 x1 x2 )  xover xover  ;
+
+\ xstack tools
+
+: xlen  ( -- n )  xp@ xp0 -  ;
+  \ Length of the current xstack, in address units.
+
+: xdepth  ( -- n )  xlen cell /  ;
+  \ Depth of the current xstack.
+
+: xdepth.  ( -- )  ." <"  s->d <# #s #> type  ." > "  ;
+
+: (.x)  ( -- )  xp0 cell+ xlen bounds do  i @ . cell +loop  ;
+  \ Display a list of the items in the xstack; TOS is the right-most item.
+
+: .x  ( -- )  xdepth dup xdepth. if  (.x)  then  ;
+  \ Display the number of items on the current xstack,
+  \ followed by a list of the items, if any; TOS is the right-most item.
+
 \ ============================================================ ;
 \ : Files
 
+\ ----------------------------------------------
+
+\ XXX try 8
+\ XXX this works!
+
+: include  ( "name" -- d1 d2 )
+  #in 2@  #file 2@  load_file  ;
+
+: end-of-file  ( d1 d2 -- )
+  end_file  #file 2!  2dup #in 2!
+  #default d= 0= if  assign prompt to-do noop  then  ;
+
+end_file  \ XXX TMP
+
+\ ----------------------------------------------
+
+\ XXX try 7
+\ XXX this works, but error "invalid channel id" is shown at the
+\ end, and then "enter" produces spaces without solution
+
+8 xstack include-stack
+  \ stack to nest the included files
+
 : include  ( "name" -- )
-  cr .s key drop \ XXX INFORMER
+  assign prompt to-do noop
+  #in 2@ include-stack 2>x
+  0 open 2dup #file 2!
+         2dup 2>x
+              #in 2!  ;
+
+: end-of-file  ( -- )
+  include-stack 2x@ close
+  include-stack 2x@ 2dup #in 2!
+  #default d= if  assign prompt to-do ok  then  ;
+
+end_file \ XXX TMP
+
+\ ----------------------------------------------
+
+\ XXX try 6
+\ XXX this works, but prints "ok" after every source line, and
+\ causes error invalid channel id" at the end
+
+8 xstack include-stack
+  \ stack to nest the included files
+
+: include  ( "name" -- )
+  #in 2@ include-stack 2>x
+  0 open 2dup #file 2!
+         2dup 2>x
+              #in 2!  ;
+
+: end-of-file  ( -- )
+  include-stack 2x@ close
+  include-stack 2x@ #in 2!  ;
+
+end_file \ XXX TMP
+
+\ ----------------------------------------------
+
+\ XXX try 5
+\ XXX this works, but prints "ok" after every source line, and
+\ causes error invalid channel id" at the end
+
+8 xstack include-stack
+  \ stack to nest the included files
+
+: include  ( "name" -- )
+  #in 2@ include-stack 2>x
+  0 open 2dup #file 2!
+              #in 2!  ;
+
+: end-of-file  ( -- )
+  #file 2@ close
+  include-stack 2x@
+  #in 2!  ;
+
+end_file \ XXX TMP
+
+\ ----------------------------------------------
+
+\ XXX try 4
+\ XXX this works, but at the end doesn't print "ok" anymore,
+\ until you force an error, and then error "invalid channel id"
+\ happens.
+
+: include  ( "name" -- d1 d2 )
+  #in 2@  #file 2@  load_file  ;
+
+: end-of-file  ( d1 d2 -- )
+  #file 2@ close  #file 2!  #in 2!   ;
+
+end_file \ XXX TMP
+
+\ ----------------------------------------------
+
+\ XXX try 3
+\ XXX this works, but gives error "invalid channel id" at the
+\ end
+
+: include  ( "name" -- d )
+  #in 2@  load_file  ;
+
+: end-of-file  ( d -- )
+  end_file  #in 2!  ;
+
+end_file \ XXX TMP
+
+\ ----------------------------------------------
+
+\ XXX try 2
+\ XXX this works, but prints 4 "ok" at the end
+
+: include  ( "name" -- d1 d2 )
+  #in 2@  #file 2@  load_file  ;
+
+: end-of-file  ( d1 d2 -- )
+  end_file  #file 2!  #in 2!  ;
+
+end_file \ XXX TMP
+
+\ ----------------------------------------------
+
+\ XXX try 1
+\ XXX FIXME -- freeze!
+
+: include  ( "name" -- )
+  r>
   #in 2@ >r >r
-  cr .s key drop \ XXX INFORMER
-  #out 2@ >r >r
-  cr .s key drop \ XXX INFORMER
   #file 2@ >r >r
-  cr .s key drop \ XXX INFORMER
+  load_file
+  >r
+  ;
+
+: end-of-file  ( -- )
+  r>
+  r> r> #file 2!
+  r> r> #in 2!
+  >r
+  ;
+
+end_file \ XXX TMP
+
+\ ----------------------------------------------
+
+\ XXX try 0
+
+: include  ( "name" -- )
+  #in 2@ >r >r
+  #out 2@ >r >r
+  #file 2@ >r >r
   load_file  \ XXX FIXME does nothing
-  cr .s key drop \ XXX INFORMER
   \ XXX FIXME the channels are wrong
   r> r> #file 2!
-  cr .s key drop \ XXX INFORMER
   r> r> #out 2!
-  cr .s key drop \ XXX INFORMER
-  r> r> #in 2!
-  cr .s key drop \ XXX INFORMER
-  ;
+  r> r> #in 2!  ;
 
 \ ============================================================ ;
 \ : Decode
 
-  \ Adapted from Solo Forth
-  \ http://programandala.net/en.program.solo_forth.html
+\ : XXX UNDER DEVELOPMENT
+
+\ Adapted from Solo Forth
+\ http://programandala.net/en.program.solo_forth.html
 
 forth definitions decimal
 
@@ -628,40 +888,9 @@ h# 87C6 constant do-colon
 end_file \ XXX TMP
 
 \ ============================================================ ;
-\ : XXX UNDER DEVELOPMENT
-
-\ include nfa4_words_fth
-
-\ : words  ( -- )
-
-\   \ lists all the words in the current vocabulary
-
-\   cr latest
-\   begin
-\       dup id. space
-\       @ dup 32768 =   \ link is 32768 at end
-\   until  drop  ;
-
-
-: [else]  ( "..." -- )
-
-  \ 1 begin   parse-name 2dup swap c@ and \ XXX OLD
-  1 begin   parse-name dup
-    while   2dup s" [if]" s=
-            if    2drop 1+
-            else  2dup s" [else]" s=
-                  if    2drop 1- dup if  1+  then
-                  else  s" [then]" s= if  1-  then
-                  then
-            then  ?dup 0= if  exit  then
-  repeat  2drop drop  ; immediate
-
-: [if]  ( "..." -- )  0= if postpone [else] then  ; immediate
-
-: [then]  ( -- )  ; immediate
-
-\ ============================================================ ;
 \ : Error
+
+\ : XXX UNDER DEVELOPMENT
 
 variable catcher
 
@@ -672,7 +901,8 @@ variable catcher
   execute         ( )     \ `execute` returns if no `throw`
   r> catcher !    ( )     \ restore previous catcher
   r> drop         ( )     \ discard saved stack pointer
-  0  ;            ( 0 )   \ normal completion, no error
+  0               ( 0 )   \ normal completion, no error
+  ;
 
 end_file
 
