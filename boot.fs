@@ -1,7 +1,7 @@
 ( boot.fs )
 
 ( This file is part of Sfera, a library for QL SUPERFORTH )
-( Version: 0.0.0+201601020225 )
+( Version: 0.0.0+201601040411 )
 ( http://programandala.net/en.program.sfera.html )
 
 ( Author: Marcos Cruz [programandala.net] )
@@ -20,13 +20,13 @@
 ( See: )
 ( http://programandala.net/en.program.sfera.history.html )
 
-( ============================================================== )
+( ============================================================ )
 
 LOWER  ( case-insensitive mode )
 
 : noop  ( -- )  ;
 
-( ============================================================== )
+( ============================================================ )
 ( Comments )
 
 : \  ( "ccc<eol>" -- )
@@ -42,6 +42,27 @@ LOWER  ( case-insensitive mode )
 
 : bounds  ( ca len -- ca2 ca )  over + swap  ;
 
+  \ XXX FIXME
+\ : 2>r  ( x1 x2 -- ) ( R: -- x1 x2 )  r> swap >r swap >r >r  ;
+
+  \ XXX FIXME
+\ : 2>r  ( x1 x2 -- ) ( R: -- x1 x2 )
+\   ?comp compile swap compile r> compile r>  ; immediate
+
+  \ XXX FIXME
+\ : 2r>  ( -- x1 x2 ) ( R: x1 x2 -- )  r> r> swap r> swap >r  ;
+
+  \ XXX FIXME
+\ : 2r>  ( -- x1 x2 ) ( R: x1 x2 -- )
+\   ?comp compile r> compile r> compile swap  ; immediate
+
+  \ XXX FIXME
+\ : rdrop  ( R: x -- )  r> r> drop >r  ;
+
+  \ XXX FIXME
+\ : rdrop  ( R: x -- )
+\   ?comp compile r> compile drop  ; immediate
+
 \ ============================================================ ;
 \ : Text output
 
@@ -52,7 +73,9 @@ LOWER  ( case-insensitive mode )
 
 : bl-word  ( "name" -- ca )  bl word  ;
 
-: parse-name  ( "name" -- ca len )  bl-word count  ;
+: parse-word  ( "name" -- ca len )  bl-word count  ;
+
+\ XXX TODO -- write `parse-name` after the standard
 
 : defined  ( "name" -- ca 0 | cfa 1 | cfa -1 )  bl-word find  ;
 
@@ -69,7 +92,6 @@ LOWER  ( case-insensitive mode )
   -1 = if    compile compile  \ non-immediate
        then  compile,
   ; immediate
-
 
 : executing?  ( -- f )  state @ 0=  ;
 : compiling?  ( -- f )  executing? 0=  ;
@@ -226,11 +248,44 @@ exvec: adjust-number  ( d -- d | n )
 16 2numeric-prefix 2h# ( "name" -- d )
 
 : c#  ( "name" -- c )
-  parse-name drop c@
+  parse-word drop c@
   compiling? if  postpone literal  then  ; immediate
   \ Parse a name and return the code of the its first
   \ character. This is an alternative to the standard words
   \ `char` and `[char]`.
+
+\ XXX FIXME -- renaming does not work during loading the file:
+
+\ ' char >name  hex
+\ \ .( 1 ) .s cr key drop
+\ c# R over 3 + c!
+\ .( 2 ) .s cr key drop
+\              c# @ b# 10000000 or swap 4 +
+\ .( 3 ) .s cr key drop
+\              c!
+\ .( 4 ) .s cr key drop decimal
+
+\ XXX FIXME -- renaming does not work in a word either,
+\ even in interpretation mode; the name field becomes corrupted
+
+: char>chr@  ( -- )
+ [ ' char >name ] literal .s cr
+ c# R over 3 + .s cr c!
+ c# @ b# 10000000 or swap 4 + .s cr c!  ;
+
+\ ' char >name hex u. cr
+\ char>chr@
+\ ' char >name u. cr decimal
+
+\ forget char>chr@
+
+\ end_file \ XXX TMP
+
+  \ Rename SUPERFORTH's `CHAR` to `CHR@` to avoid name
+  \ clash with standard Forth's `char`.
+
+\ : char    ( "name" -- c )  bl-word char+ c@  ;
+\ : [char]  ( "name" -- c )  char postpone literal  ; immediate
 
 \ ============================================================ ;
 \ : Number output
@@ -272,8 +327,25 @@ variable base'
 \ ============================================================ ;
 \ : Strings
 
+: parse-string  ( -- ca len )
+  c# " word count  ;
+  \ XXX TODO
+
 : s"  ( "ccc<quote>" --- ca len )
   c# " word dup count pad swap cmove c@ pad swap ;
+  \ XXX TODO -- state-smart
+
+: noname-string  ( n -- ca )
+  2+ here 1+ swap allot  ;
+  \ Create a string without name, with a maximum length _n_,
+  \ and return the address of its length byte.
+
+: string!  ( ca1 len1 ca2 -- )
+  2dup max_len > 23 ?error  \ string too long?
+  2dup c!
+  1+ swap cmove ;
+  \ Store string _ca1 len1_ into counted string _ca2_,
+  \ created by `string` or `noname-string`.
 
 \ ============================================================ ;
 \ : Keyboard
@@ -377,7 +449,7 @@ variable base'
      dup @ h# 96D0 = if  drop ." 2CONSTANT " exit  then
      dup @ h# 877C = if  drop ." CONSTANT  " exit  then
          @ h# 9542 = if       ." EXVECT:   " exit  then
-  ." unknown   "  ; 
+  ." unknown   "  ;
 
 : .xheader  ( lfa -- )
   cr dup   .xheader-field  dup link> >r
@@ -530,7 +602,6 @@ create_device nfa1_
 create_device nfa4_
 nfa4_
 
-
 \ ============================================================ ;
 \ : Values
 
@@ -542,7 +613,7 @@ nfa4_
                      else  !  then  ; immediate
 
 \ ============================================================ ;
-\ xstack
+\ : xstack
 
   \ Credits:
   \
@@ -559,12 +630,12 @@ nfa4_
 : xstack  ( n "name" -- )
   \ Create a new xstack of _n_ cells.
   create
-    cells  \ size
+    cells dup  \ size
     here [ 3 cells cell- ] literal + dup  \ bottom and top
     , , ,
-    \ +0 = xp0
-    \ +2 = xp
-    \ +4 = xsize
+      \ cell 0 = xp0
+      \ cell 1 = xp
+      \ cell 2 = xsize
     allot
   does> ( -- )
     \ Make an xstack the current one.
@@ -625,12 +696,230 @@ nfa4_
   \ followed by a list of the items, if any; TOS is the right-most item.
 
 \ ============================================================ ;
+\ : Misc
+
+\ XXX TMP -- fake definition
+: allocate  ( n -- a ior )  here swap allot 0  ;
+
+\ XXX TMP -- fake definition
+: throw  ( n -- )  ?dup if  abs 1- error  then  ;
+
+: move  ( a1 a2 u -- )
+  ?dup if
+    >r 2dup u< if  r> cmove>  r> cmove  then
+  else  2drop  then  ;
+  \ XXX TODO test
+
+: save-mem  ( ca1 len -- ca2 len )
+  swap >r
+  dup allocate throw
+  swap 2dup r> rot rot move  ;
+  \ Copy a memory block into a newly allocated region in the
+  \ heap.
+
+\ ============================================================ ;
+\ : List
+
+\ XXX UNDER DEVELOPMENT -- adapted from Gforth's
+\ <compat/required.fs>
+
+\ : string>list ( ca len listp -- )
+\   >r save-mem ( ca1 len )
+\   [ 3 cells ] literal allocate throw \ allocate list node
+\   r@ @ over !   \ set next pointer
+\   dup r> !      \ store current node in list var
+\   cell+ 2!  ;   \ store string pair in node
+
+\ : string-listed? ( ca len list -- f )  \ XXX OLD
+\   rot rot 2>r
+\   begin  ( list R: ca len ) dup  while
+\     dup cell+ 2@ 2r@ compare 0= if
+\       drop 2r> 2drop true exit
+\     then @
+\   repeat  ( drop 0 ) 2r> 2drop  ;
+
+\ : string-listed? ( list -- f )  \ XXX NEW
+\   rot rot 2>r
+\   begin  ( list R: ca len ) dup  while
+\     dup cell+ 2@ 2r@ compare 0= if
+\       drop 2r> 2drop true exit
+\     then @
+\   repeat  ( drop 0 ) 2r> 2drop  ;
+\   \ Is the filename stored in `file` in the list
+\   \ of included files?
+
+\ : ?string>list  ( ca len a -- )
+\   >r 2dup r@ @ string-listed?
+\   if  r> drop 2drop  else  r> string>list  then  ;
+\   \ Add string _ca len_ to
+
+\ ============================================================ ;
+\ : String list
+
+\ Code based on Gforth's public-domain file
+\ <compat/required.fs>. Modified to use SUPERFORTH's counted
+\ strings.
+
+: string>list ( ca a -- )
+  here >r
+  dup @ ,     \ point this node to the previous one
+  r> swap !   \ point the list to this node
+  ,  ;        \ point to the string
+  \ Add string _ca_ to the list pointed by _a_.
+
+exvec: string=  ( ca1 ca2 -- f )
+  \ Compare two strings.
+
+assign string= to-do $==
+  \ Case-insensitive comparison by default.
+
+: string-listed? ( ca a -- f )
+  @ swap >r
+  begin  ( a' ) ( R: ca ) dup  while
+    dup cell+ @ r@ string= if
+      drop r> drop true exit
+    then @
+  repeat  drop r> drop false  ;
+  \ Is the filename stored in _ca_ in the list pointed by _a_?
+
+: ?string>list  ( ca len a -- )
+  2dup string-listed? if  2drop  else  string>list  then  ;
+  \ Add string _ca len_ to
+
+\ ============================================================ ;
 \ : Files
 
 \ ----------------------------------------------
 
+\ XXX try 12
+\ 2016-01-03
+
+\ XXX FIXME filenames are not included in the list
+
+8 constant include-levels
+include-levels 2 * xstack include-stack
+  \ Stack for the included files.
+  \ 2 cells per include level.
+
+5 36 + constant /filename
+  \ Maximum length of a filename (36), plus the device (5).
+
+/filename string filename
+  \ The current filename.
+
+: filename!  ( ca len -- )  filename string!  ;
+
+: include-current  ( -- )
+  include-stack  #in 2@ 2>x  #file 2@ 2>x
+  0 filename open_device 2dup #file 2! #in 2!
+  assign prompt to-do noop  ;
+
+variable included-filenames  0 included-filenames !
+  \ Pointer to the latest node of the list of included
+  \ filenames.
+
+: >filename-list  ( ca len -- ca a )
+  filename!  filename included-filenames  ;
+
+: included?  ( ca len -- f )
+  >filename-list string-listed?  ;
+
+: included  ( ca len -- )
+  >filename-list ?string>list  include-current  ;
+
+: include  ( "name" -- )  parse-word included  ;
+
+: required  ( ca len -- )
+  2dup included? if  2drop  else  include-current  then  ;
+
+: require   ( "name" -- )  parse-word required  ;
+
+: end-of-file  ( -- )
+  end_file
+  include-stack  2x> #file 2!  2x> 2dup #in 2!
+  #default d= 0= if  assign prompt to-do noop  then  ;
+
+end_file  \ XXX TMP
+
+\ ----------------------------------------------
+
+\ XXX try 11 -- it works!
+\ 2016-01-03
+
+8 constant include-levels
+include-levels 2 * xstack include-stack
+  \ Stack for the included files.
+  \ 2 cells per include level.
+
+41 constant /filename
+/filename string filename
+
+: filename-included  ( -- )
+  include-stack  #in 2@ 2>x  #file 2@ 2>x
+  0 filename open_device 2dup #file 2! #in 2!
+  assign prompt to-do noop  ;
+
+: included  ( ca len -- )
+  filename string! filename-included  ;
+
+: include  ( "name" -- )  parse-word included  ;
+
+: end-of-file  ( -- )
+  end_file
+  include-stack
+  2x> #file 2!
+  2x> 2dup #in 2!
+  #default d= 0= if  assign prompt to-do noop  then  ;
+
+end_file  \ XXX TMP
+
+\ ----------------------------------------------
+\ XXX try 10 -- works!
+\ 2016-01-03
+
+8 2 * xstack include-stack
+  \ Stack to nest the included files.
+  \ 8 nestings, 2 cells each.
+
+: include  ( "name" -- )
+  include-stack
+  #in 2@ 2>x
+  #file 2@ 2>x
+  load_file  ;
+
+: end-of-file  ( -- )
+  end_file
+  include-stack
+  2x> #file 2!
+  2x> 2dup #in 2!
+  #default d= 0= if  assign prompt to-do noop  then  ;
+
+end_file  \ XXX TMP
+
+\ ----------------------------------------------
+
+\ XXX try 9  -- replacing `load_file`
+\ XXX it works!
+\ 2016-01-03
+
+: include  ( "name" -- d1 d2 )
+  #in 2@  #file 2@
+  \ load_file  \ XXX OLD
+  0 open 2dup #file 2! #in 2!  \ XXX NEW
+  assign prompt to-do noop
+  ;
+
+: end-of-file  ( d1 d2 -- )
+  end_file
+  #file 2!  2dup #in 2!
+  #default d= 0= if  assign prompt to-do noop  then  ;
+
+end_file  \ XXX TMP
+
+\ ----------------------------------------------
+
 \ XXX try 8
-\ XXX this works!
+\ XXX it works!
 
 : include  ( "name" -- d1 d2 )
   #in 2@  #file 2@  load_file  ;
@@ -644,7 +933,7 @@ end_file  \ XXX TMP
 \ ----------------------------------------------
 
 \ XXX try 7
-\ XXX this works, but error "invalid channel id" is shown at the
+\ XXX it works, but error "invalid channel id" is shown at the
 \ end, and then "enter" produces spaces without solution
 
 8 xstack include-stack
@@ -667,7 +956,7 @@ end_file \ XXX TMP
 \ ----------------------------------------------
 
 \ XXX try 6
-\ XXX this works, but prints "ok" after every source line, and
+\ XXX it works, but prints "ok" after every source line, and
 \ causes error invalid channel id" at the end
 
 8 xstack include-stack
@@ -688,7 +977,7 @@ end_file \ XXX TMP
 \ ----------------------------------------------
 
 \ XXX try 5
-\ XXX this works, but prints "ok" after every source line, and
+\ XXX it works, but prints "ok" after every source line, and
 \ causes error invalid channel id" at the end
 
 8 xstack include-stack
@@ -709,7 +998,7 @@ end_file \ XXX TMP
 \ ----------------------------------------------
 
 \ XXX try 4
-\ XXX this works, but at the end doesn't print "ok" anymore,
+\ XXX it works, but at the end doesn't print "ok" anymore,
 \ until you force an error, and then error "invalid channel id"
 \ happens.
 
@@ -724,7 +1013,7 @@ end_file \ XXX TMP
 \ ----------------------------------------------
 
 \ XXX try 3
-\ XXX this works, but gives error "invalid channel id" at the
+\ XXX it works, but gives error "invalid channel id" at the
 \ end
 
 : include  ( "name" -- d )
@@ -738,7 +1027,7 @@ end_file \ XXX TMP
 \ ----------------------------------------------
 
 \ XXX try 2
-\ XXX this works, but prints 4 "ok" at the end
+\ XXX it works, but prints 4 "ok" at the end
 
 : include  ( "name" -- d1 d2 )
   #in 2@  #file 2@  load_file  ;
@@ -750,21 +1039,44 @@ end_file \ XXX TMP
 
 \ ----------------------------------------------
 
-\ XXX try 1
+\ XXX try 1b
 \ XXX FIXME -- freeze!
 
 : include  ( "name" -- )
   r>
-  #in 2@ >r >r
-  #file 2@ >r >r
+  #in 2@ swap >r >r
+  #file 2@ swap >r >r
   load_file
   >r
   ;
 
 : end-of-file  ( -- )
   r>
-  r> r> #file 2!
-  r> r> #in 2!
+  r> r> swap #file 2!
+  r> r> swap 2dup #in 2!
+  #default d= 0= if  assign prompt to-do noop  then
+  >r
+  ;
+
+end_file \ XXX TMP
+
+\ ----------------------------------------------
+
+\ XXX try 1
+\ XXX FIXME -- freeze!
+
+: include  ( "name" -- )
+  r>
+  #in 2@ swap >r >r
+  #file 2@ swap >r >r
+  load_file
+  >r
+  ;
+
+: end-of-file  ( -- )
+  r>
+  r> r> swap #file 2!
+  r> r> swap #in 2!
   >r
   ;
 
