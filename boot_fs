@@ -1008,8 +1008,6 @@ include dev4_include_code_fs  \ XXX TMP
 \ include-code dev5_three_dup_bin  \ XXX TMP
 \ include-code dev5_to_a_bin  \ XXX TMP
 include dev4_dump_fs
-include-code dev5_os_info_bin  \ XXX TMP
-\ include-code dev5_win_line_len_bin  \ XXX TMP
 include-code dev5_get_mode_bin  \ XXX TMP
 
 here fence !

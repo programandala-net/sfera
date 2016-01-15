@@ -4,10 +4,12 @@
 ; http://programandala.net/en.program.sfera.html
 
 ; Author: Marcos Cruz (programandala.net), 2016.
-; Based on code from: Display Extensions V2.01 (last update
-; 2003-02-21) written by Dilwyn Jones.
+;
+; Credit: Based on code from Display Extensions V2.01 (last
+; update 2003-02-21), written by Dilwyn Jones,
+; <http://dilwyn.me.uk>.
 
-; Last update: 201601141943
+; Last update: 201601151821
 
 ; ==============================================================
 ; License
@@ -26,6 +28,7 @@
 ; History
 
 ; 2016-01-14: Written.
+; 2016-01-15: Added more detailed credits.
 
 ; ==============================================================
 

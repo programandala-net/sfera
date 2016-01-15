@@ -95,6 +95,11 @@ in Forth or binary files.
 - System information words: `screen-size`, `get-mode`, `sys-vars`,
   `current-job-id`.....
 
+=== 0.1.1+20160115
+
+- Fix: Removed a missing old file loaded from <boot_fs>.
+- Change: Updated some file headers.
+
 ==== Unfinished, known issues
 
 A lot. See <TO-DO.adoc>, but there are many more issues noted in the

@@ -25,15 +25,20 @@
 
 ; This file was created with files and information from:
 
-; GWASL assembler (by George Wilt, 2008)
+; GWASL assembler, by George Wilt, 2008,
+; <http://gwiltprogs.info/>.
+;
 ; QL Advanced User Guide (by Adrian Dickens, 1984)
-; SMSQ/E sources (by Tonny Tebby et al.)
+;
+; SMSQ/E sources, by Tonny Tebby et al.,
+; <http://www.wlenerz.com/smsqe/>.
 
 ; ==============================================================
 ; History
 
 ; 2016-01-11: Added to the library.
 ; 2016-01-14: Reorganized. Titles.
+; 2016-01-15: Added URLs to the credits.
 
 ; ==============================================================
 ; Traps

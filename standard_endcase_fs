@@ -67,4 +67,6 @@
 
 ' dup 38752 !  \ hack `default` to compile `dup` instead of `drop`
 
+end-of-file
+
 \ vim: filetype=superforthsfera

@@ -102,7 +102,8 @@ zip:
 		sfera/Makefile \
 		sfera/README.adoc \
 		sfera/TO-DO.adoc \
-		sfera/asm/*_asm && \
+		sfera/asm/*_asm \
+		sfera/bin/* && \
 	cd -
 
 # ----------------------------------------------
