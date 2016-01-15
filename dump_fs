@@ -1,0 +1,38 @@
+\ dump_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net), 2016
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain all the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-01-09: Code extracted from <boot_fs>.
+
+\ ==============================================================
+
+: (dump)  ( ca len -- )
+  8 2dup mod - + 8 / 0
+  do
+    dup .dump-address
+    8 0 do  i over + c@ 8hex. loop
+    dup 8 type
+  8 + loop  drop  ;
+  \ Show the contents of _len_ bytes starting from _ca_.
+
+: dump  ( ca len -- )
+  ?dup if  (dump)  else  drop  then  ;
+  \ Show the contents of _len_ bytes starting from _ca_.
+
+end-of-file
+
+\ vim: filetype=superforthsfera

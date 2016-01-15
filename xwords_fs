@@ -1,0 +1,73 @@
+\ xwords_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net)
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain all the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ Description
+
+\ This module provides `xwords`, which print a table containing
+\ all header addresses from all words in the current search
+\ order. The table is printed is AsciiDoc/Asciidoctor format.
+
+\ ==============================================================
+\ History
+
+\ 2016-01-06: Code extracted from <boot.fs>.
+\
+\ 2016-01-12: Updated: `link>link? 0=` instead of `first-word?`.
+
+\ ==============================================================
+
+: |  ( -- )  ." | "  ;
+
+: table  ( -- )  cr ." |==="  ;
+
+: .xheader-field  ( n -- )  | 16hex. ;
+
+: .xtype  ( cfa -- )
+  dup @ over >body = if  drop ." CODE (at PFA)     " exit  then
+     dup @ h# 87C6 = if  drop ." :                 " exit  then
+     dup @ h# 87AA = if  drop ." USER              " exit  then
+     dup @ h# 879A = if  drop ." CREATE            " exit  then
+     dup @ h# 96D0 = if  drop ." 2CONSTANT         " exit  then
+     dup @ h# 877C = if  drop ." CONSTANT          " exit  then
+         @ h# 9542 = if       ." EXVECT:           " exit  then
+                              ." CODE (not at PFA) "  ;
+
+: .xheader  ( lfa -- )
+  cr dup   .xheader-field  dup link> >r
+  r@ >name .xheader-field
+  r@       .xheader-field
+  r@ @     .xheader-field
+  r@ >body .xheader-field
+  r>       | .xtype
+           | id. ;
+
+: xwords  ( -- )
+  table
+  cr ." | LFA  | NFA  | CFA  | Code | PFA  | Type              | Name" cr
+  latest ( lfa )
+  begin
+    dup .xheader space-paused
+    link>link? 0= escape-key? or
+  until  drop  table  ;
+  \ Print the words table to the current output channel.
+
+: xwords>printer  ( -- )
+  printer_on xwords printer_off  ;
+  \ Print the words table to the printer.
+
+end-of-file
+
+\ vim: filetype=superforthsfera

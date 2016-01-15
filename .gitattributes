@@ -1,0 +1,5 @@
+*_fs linguist-language=Forth
+*_asm linguist-language=Assembly
+
+bin/* linguist-vendored
+*_bin linguist-vendored

@@ -1,0 +1,469 @@
+\ assembler_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Authors: Henry Laxen and Michael Perry, 1984.
+\ Changes: Marcos Cruz (programandala.net), 2016
+
+\ XXX UNDER DEVELOPMENT
+
+\ Last update: 2016-01-10 22:05 +0100
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain all the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ Description
+
+\ This is the assembler of the 68000 F83 Forth system.
+
+\ ==============================================================
+\ History
+
+\ 2016-01-07: Copied from F83.
+\ 2016-01-10: First changes.
+
+\ ==============================================================
+
+\ Load Screen for 68000 Dependent Code                07Apr84map
+
+ONLY FORTH ALSO DEFINITIONS   DECIMAL
+
+\ 68000 Assembler Load Screen                         13Apr84map
+
+: NEXT
+  \ >NEXT #) JMP   \ XXX TODO
+  ;
+  \ NEXT is a macro. It assembles a jump to >NEXT.
+  \ Nearly all CODE words end with NEXT.
+
+: INIT    [ ASSEMBLER ] WORD  ;
+ONLY FORTH ALSO DEFINITIONS
+
+HEX 4EB8 CONSTANT DOES-OP   DECIMAL
+  \ call opcode compiled by DOES>.
+
+4 CONSTANT DOES-SIZE
+  \ length of the call in bytes.
+
+: DOES?   (S IP -- IP' F )
+  DUP DOES-SIZE + SWAP @ DOES-OP =  ;
+  \   test for DOES> word.  Used by the decompiler.
+
+: LABEL   CREATE  ASSEMBLER  [ ASSEMBLER ] INIT  ;
+  \ mark the start of a subroutine whose name returns its
+  \   address.
+
+: CODE    CODE  [ ASSEMBLER ] INIT  ;
+  \ create a Forth code word.
+
+\ 68000 Assembler                                     10Jan84map
+
+ASSEMBLER ALSO DEFINITIONS
+: A?>MARK      (S -- addr f )   HERE  TRUE  ;
+: A?>RESOLVE   (S addr f -- )
+   ?CONDITION  HERE OVER - SWAP 1- C!  ;
+: A?<MARK      (S -- addr f )   HERE  TRUE  ;
+: A?<RESOLVE   (S addr f -- )
+   ?CONDITION  HERE - HERE 1- C!  ;
+
+\ Deferring the definitions of the commas, marks, and resolves
+\ allows the same assembler to serve for both the system and the
+\ Meta-Compiler.
+
+DEFER C,          FORTH ' C,        ASSEMBLER IS C,
+DEFER ,           FORTH ' ,         ASSEMBLER IS ,
+DEFER ?>MARK      ' A?>MARK      IS ?>MARK
+DEFER ?>RESOLVE   ' A?>RESOLVE   IS ?>RESOLVE
+DEFER ?<MARK      ' A?<MARK      IS ?<MARK
+DEFER ?<RESOLVE   ' A?<RESOLVE   IS ?<RESOLVE
+
+\ 68000 Meta Assembler                                13Apr84map
+
+: C;   END-CODE   ;
+
+: ?,   IF , THEN , ;
+  \ compiles one or two numbers.
+
+: 2,   , , ;
+
+OCTAL \ convenient for the bit fields in the 68000.
+
+VARIABLE SIZE
+  \ Many 68000 instructions can operate on either 8, 16, or 32-bit
+  \ data. Rather than specify the size individually for each
+  \ instruction, the variable SIZE contains the size information for
+  \ any instruction which needs it.  Size is set by BYTE, WORD, and
+  \ LONG.
+
+: BYTE  10000 SIZE ! ;
+: WORD  30100 SIZE ! ; WORD
+: LONG  24600 SIZE ! ;
+
+: SZ   CONSTANT DOES> @ SIZE @ AND OR ;
+  \ Define words which select certain bits from SIZE and install
+  \ them into the instruction being assembled. The size field moves
+  \ around considerably.
+
+00300 SZ SZ3            00400 SZ SZ4
+04000 SZ SZ40           30000 SZ SZ300
+
+: LONG?   SIZE @ 24600 = ;
+  \ Leave a flag, true if SIZE is LONG.
+
+: -SZ1    LONG? IF  100 OR  THEN ;
+  \ Handle an special case where the size field is inverted
+  \ with respect to all others. Nice job, Motorola!
+
+\ Assembler registers and addressing modes.           18Apr84map
+
+: REGS   10 0 DO  DUP 1001 I * OR  CONSTANT  LOOP  DROP ;
+  \ Notice that REGS defines several words each time it is used.
+
+: MODE    CONSTANT  DOES> @ SWAP 7007 AND OR ;
+  \ Define modifiers which will follow an address register.
+  \ Examples:
+  \ D0 thru D7 are data registers.
+  \ A0 thru A7 are address registers.
+  \ D0 A1 ) MOVE   Move contents of D0 to where A1 points.
+  \ A7 )+ D1 MOVE   pop item off stack pointed to by A7 into D1.
+  \ D2 A6 -) MOVE   push D2 onto stack pointed to by A6.
+  \ 12 A3 D) CLR   clear address 12 bytes past where A3 points.
+  \ 34 D3 A4 DI) NEG  negate contents of address at A4+D3+34.
+  \ 1234 #) JMP  jump to absolute address 1234. *NOTE* sign extends!
+  \ 12.3456 L#) JMP  jump to long absolute address 123456.
+  \ 56 PCD) D4 MOVE get contents of address at PC+56 into D4.
+  \ 78 D5 PCDI) NOT complement contents of address at PC+D5+78.
+  \ 9876 # D6 MOVE  put the value 9876 into D6.
+
+0000 REGS     D0   D1   D2   D3   D4   D5   D6   D7
+0110 REGS     A0   A1   A2   A3   A4   A5   A6   A7
+0220 MODE     )         ( address register indirect )
+0330 MODE     )+        ( adr reg ind post-increment )
+0440 MODE     -)        ( adr reg ind pre-decrement )
+0550 MODE     D)        ( adr reg ind displaced )
+0660 MODE     DI)       ( adr reg ind displaced indexed )
+0770 CONSTANT #)        ( immediate address )
+1771 CONSTANT L#)       ( immediate long address )
+2772 CONSTANT PCD)      ( PC relative displaced )
+3773 CONSTANT PCDI)     ( PC relative displaced indexed )
+4774 CONSTANT #         ( immediate data )
+
+\ fields and register assignments                     02Apr84map
+
+: FIELD   CONSTANT  DOES> @ AND ;
+  \ Define words which mask off various bit fields.
+
+7000 FIELD RD  0007 FIELD RS
+  \ RS and RD select the source or destination register field.
+
+0070 FIELD MS  0077 FIELD EAS  0377 FIELD LOW
+  \ MS selects the source mode field.
+  \ EAS selects the source effective address field.
+  \ LOW selects the low byte.
+
+: DN?   (S ea -- ea flag )  DUP MS 0= ;
+  \ DN?   tests for data register mode.
+: SRC   (S ea instr -- ea instr' )   OVER EAS OR ;
+  \ SRC   merges the source register and mode into the instruction.
+: DST   (S ea instr -- ea instr' )   SWAP RD  OR ;
+  \ DST   merges the destination register into the instruction.
+
+  \ XXX TODO --- adapt
+A7 CONSTANT SP   ( Stack pointer )
+A6 CONSTANT RP   ( Return stack pointer )
+A5 CONSTANT IP   ( Interpreter pointer )
+A4 CONSTANT W    ( Working register )
+  \ These are the register assignments for the virtual Forth machine
+  \ You can refer to the virtual machine registers, for example:
+  \ RP )+ SP -) MOVE  pops the top item from the return stack onto
+  \ the data stack.
+  \ NOTE:   registers A4-A7 and D7 are used, all others are free.
+  \  Registers which are used by Forth must be saved and restored
+  \  by any routine which uses them.
+
+\ extended addressing                                 31Oct83map
+
+\ Many of the 68000's addressing modes require additional bytes
+\ following the opcode.
+
+: DOUBLE?  ( mode -- flag )   DUP L#) = SWAP # = LONG? AND OR ;
+  \ DOUBLE?  leaves true if the given mode requires 32 bits of extra
+  \   addressing information.
+
+: INDEX?   ( {n} mode -- {m} mode )
+   DUP >R  DUP 0770 AND A0 DI) =  SWAP PCDI) =  OR
+   IF   DUP RD 10 * SWAP MS  IF  100000 OR  THEN
+        SZ40 SWAP LOW OR
+   THEN  R> ;
+  \ INDEX?  does nothing unless the given mode is an indexed mode,
+  \  in which case it packs the extra data into the required format.
+
+: MORE?   ( ea -- ea flag )  DUP MS 0040 > ;
+  \ MORE?   tests for extra addressing words.
+
+: ,MORE   ( ea -- )   MORE?
+   IF  INDEX?  DOUBLE?  ?,  ELSE  DROP  THEN ;
+  \ ,MORE   assembles the extra words.
+
+\ extended addressing  extras                         10Jan84map
+
+CREATE EXTRA   HERE 5 DUP ALLOT ERASE \ temporary storage area
+  \ EXTRA   is a temporary storage area for extended addressing
+  \   operands.
+
+: EXTRA?   ( {n} mode -- mode )   MORE?
+    IF >R  R@ INDEX?  DOUBLE?  EXTRA 1+ SWAP
+       IF  2! 2  ELSE  ! 1 THEN  EXTRA C!  R>
+    ELSE   0 EXTRA !
+    THEN  ;
+  \ EXTRA?   tests a mode for extra words. If present, they are
+  \   saved in EXTRA to get them out of the way until needed.
+
+: ,EXTRA   ( -- )
+  EXTRA C@  ?DUP
+  IF  EXTRA 1+ SWAP 1 =
+      IF  @ ,  ELSE  2@ 2,  THEN  EXTRA 5 ERASE
+  THEN ;
+  \ ,EXTRA   retrieves the words in EXTRA, if any, and assembles
+  \   them.
+
+\ immediates & address register specific              31Oct83map
+
+: IMM   CONSTANT  DOES> @ >R EXTRA? EAS R> OR SZ3 ,
+   LONG? ?,  ,EXTRA ;   ( n ea )
+  \ defining word for immediate instructions.
+
+0000 IMM ORI            1000 IMM ANDI
+2000 IMM SUBI           3000 IMM ADDI
+5000 IMM EORI           6000 IMM CMPI
+
+: IMMSR   CONSTANT  DOES> @ SZ3 2, ; ( n )
+  \ defining word for immediate to ststus register instructions.
+
+001074 IMMSR ANDI>SR
+005074 IMMSR EORI>SR
+000074 IMMSR ORI>SR
+
+: IQ   CONSTANT DOES> @ >R  EXTRA?  EAS SWAP RS 1000 * OR
+  \ defining word for quick instructions.
+
+   R> OR SZ3 , ,EXTRA ;  ( n ea )
+050000 IQ ADDQ          050400 IQ SUBQ
+
+: IEAA   CONSTANT  DOES> @ DST SRC SZ4 , ,MORE ; ( ea An )
+  \    defining word for effective address to address register
+  \    instructions.
+
+150300 IEAA ADDA        130300 IEAA CMPA
+040700 IEAA LEA         110300 IEAA SUBA
+
+\ shifts, rotates, and bit manipulation               31Oct83map
+
+: ISR    CONSTANT  DOES> @ >R DN?
+   IF  SWAP DN? IF  R> 40 OR >R  ELSE DROP SWAP 1000 * THEN
+       RD SWAP RS OR R> OR 160000 OR SZ3 ,
+   ELSE  DUP EAS 300 OR R@ 400 AND OR R> 70 AND 100 * OR
+         160000 OR , ,MORE
+   THEN ;  ( Dm Dn ) ( m # Dn ) ( ea )
+  \    defining word for shifts and rotates.
+
+400 ISR ASL             000 ISR ASR
+410 ISR LSL             010 ISR LSR
+420 ISR ROXL            020 ISR ROXR
+430 ISR ROL             030 ISR ROR
+: IBIT   CONSTANT  DOES> @ >R  EXTRA?  DN?
+   IF  RD SRC 400  ELSE  DROP DUP EAS 4000  THEN
+   OR R> OR , ,EXTRA ,MORE ;  ( ea Dn ) ( ea n # )
+  \    defining word for bit manipulators.
+
+000 IBIT BTST           100 IBIT BCHG
+200 IBIT BCLR           300 IBIT BSET
+
+\ branch, loop, and set conditionals                  18Apr84map
+
+\   There are three classes of conditional instructions: branch,
+\ decrement and branch, and set. In each case there is a four bit
+\ field which contains the condition code. This field is the only
+\ difference between members of a class. Rather than explicitly
+\ define sixteen words for each class, the word SETCLASS is used
+\ to define all sixteen at once by re-executing the defining word
+\ with a different value for the condition code each time. Of the
+\ 48 words so defined, only DXIT and SNO are useless.
+
+: SETCLASS    ' SWAP 0 DO I OVER EXECUTE LOOP DROP ;
+  \   Compiler directives like SETCLASS can be very useful. It would
+  \ be better if there was a way to throw them away after use. I am
+  \ planning to add a TRANSIENT definitions capability for this and
+  \ other reasons.
+
+: IBRA   400 * 060000 OR CONSTANT    ( label )
+          DOES> @ SWAP ?>MARK DROP 2+ - DUP ABS 200 <
+          IF  LOW OR ,  ELSE  SWAP 2,  THEN  ;
+20 SETCLASS IBRA   BRA BSR BHI BLS BCC BCS BNE BEQ
+                   BVC BVS BPL BMI BGE BLT BGT BLE
+: IDBR  400 * 050310 OR CONSTANT    ( label \ Dn - )
+          DOES> @ SWAP RS OR , ?>MARK DROP - , ;
+20 SETCLASS IDBR   DXIT DBRA DBHI DBLS DBCC DBCS DBNE DBEQ
+                   DBVC DBVS DBPL DBMI DBGE DBLT DBGT DBLE
+: ISET    400 * 050300 OR CONSTANT    ( ea )
+          DOES> @ SRC , ,MORE  ;
+20 SETCLASS ISET   SET SNO SHI SLS SCC SCS SNE SEQ
+                   SVC SVS SPL SMI SGE SLT SGT SLE
+
+\ moves                                               10Jan84map
+
+\ These are the MOVE instructions in all their glory.
+\ Notice that I have added LMOVE. This is because the 68000 treats
+\ addresses as signed numbers. When a 16 bit address is loaded
+\ into an address register, it is sign-extended. This is never
+\ what I want. Values loaded into data registers is not extended,
+\ so I often load 16 bits into a data register, then move all 32
+\ bits into an address register to get an unextended address.
+\ Data register 7 is reserved in this system for this purpose.
+\ LMOVE lets me do the above nonsense without switching to between
+\ LONG and WORD sizes constantly.
+\ To keep the assembler simple, some words use modified Motorola
+\ mnemonics. HEX FFFF SP -) MOVEM> will save all registers on the
+\ stack. ( pronounced MOVEM-OUT ).
+
+: MOVE       EXTRA? 7700 AND SRC SZ300 ,
+       ,MORE ,EXTRA ;  ( ea ea )
+: MOVEQ      RD SWAP LOW OR 070000 OR , ;  ( n Dn )
+: MOVE>USP   RS 047140 OR , ;  ( An )
+: MOVE<USP   RS 047150 OR , ;  ( An )
+: MOVEM>
+   EXTRA? EAS   044200 OR -SZ1 , , ,EXTRA ;  ( n ea )
+: MOVEM<
+   EXTRA? EAS   046200 OR -SZ1 , , ,EXTRA ;  ( n ea )
+: MOVEP      DN? IF    RD SWAP RS OR 410 OR
+                 ELSE   RS ROT RD OR 610 OR THEN  -SZ1 2, ;
+   ( Dm d An ) ( d An Dm )
+: LMOVE      7700 AND SWAP EAS OR 20000 OR , ;
+  ( long reg move )
+
+\ odds and ends                                       16Jan84map
+
+  \ Examples:
+  \ A5 )+ A3 )+ CMPM
+  \ D0 A3 EXG
+
+  \ D2 EXT
+  \ D1 SWAP
+  \ 1234 STOP
+  \ 3 TRAP
+  \ 8 A6 LINK
+  \ A6 UNLK
+  \ D0 A5 ) EOR
+  \ A7 )+ D0 CMP
+
+: CMPM   RD SWAP RS OR 130410 OR SZ3 , ;  ( An@+ Am@+ )
+
+: EXG   DN? IF   SWAP DN?  IF  140500 ELSE 140610 THEN >R
+            ELSE SWAP DN?  IF  140610 ELSE 140510 THEN >R SWAP
+            THEN  RS DST R> OR , ;  ( Rn Rm )
+: EXT    RS 044200 OR -SZ1 , ; ( Dn )
+: SWAP   RS 044100 OR , ; ( Dn )
+: STOP   47162 2, ; ( n )
+: TRAP   17 AND 47100 OR , ; ( n )
+: LINK   RS 047120 OR 2, ; ( n An )
+: UNLK   RS 047130 OR , ; ( An )
+: EOR   EXTRA? EAS DST SZ3 130400 OR , ,EXTRA ;  ( Dn ea )
+: CMP   130000 DST SRC SZ3 , ,MORE ;  ( ea Dn )
+
+\ arithmetic and logic                                08Apr84map
+
+: IBCD   CONSTANT  DOES> @ DST OVER RS OR [ FORTH ] SWAP MS
+        IF  10 OR  THEN  , ;  ( Dn Dm ) ( An@- Am@- )
+  \    defining word for Binary Coded Decimal instructions.
+
+140400 IBCD ABCD         100400 IBCD SBCD
+: IDD   CONSTANT  DOES> @ DST OVER RS OR [ FORTH ] SWAP MS
+        IF  10 OR  THEN  SZ3 , ;  ( Dn Dm ) ( An@- Am@- )
+  \    defining word for extended instructions.
+  \   e.g. A1 -) A2 -) ADDX     D0 D1 ADDX
+
+150400 IDD ADDX         110400 IDD SUBX
+
+: IDEA   CONSTANT  DOES> @ >R DN?  ( ea Dn ) ( Dn ea )
+    IF  RD SRC R> OR SZ3 , ,MORE
+    ELSE  EXTRA? EAS DST 400 OR R> OR SZ3 , ,EXTRA  THEN ;
+  \   defining word for some arithmetic and logical instructions.
+
+150000 IDEA ADD         110000 IDEA SUB
+140000 IDEA AND         100000 IDEA OR
+
+: IEAD   CONSTANT  DOES> @ DST SRC     , ,MORE ;  ( ea Dn )
+  \   defining word for some arithmetic and logical instructions.
+
+040600 IEAD CHK
+100300 IEAD DIVU        100700 IEAD DIVS
+140300 IEAD MULU        140700 IEAD MULS
+
+\ arithmetic and control                              31Oct83map
+
+: IEA    CONSTANT  DOES> @ SRC , ,MORE ;  ( ea )
+  \   defining word for instructions which take only an effective
+  \   address.
+
+047200 IEA JSR          047300 IEA JMP
+042300 IEA MOVE>CCR
+040300 IEA MOVE<SR      043300 IEA MOVE>SR
+044000 IEA NBCD         044100 IEA PEA
+045300 IEA TAS
+
+: IEAS  CONSTANT  DOES> @ SRC SZ3 , ,MORE ;  ( ea )
+  \   defining word for instructions which take only an effective
+  \   address, and are affected by SIZE.
+
+047200 IEA JSR          047300 IEA JMP
+042300 IEA MOVE>CCR
+041000 IEAS CLR         043000 IEAS NOT
+042000 IEAS NEG         040000 IEAS NEGX
+045000 IEAS TST
+
+: ICON   CONSTANT  DOES> @  , ;
+  \   defining word for instructions which take no arguments.
+
+47160 ICON RESET        47161 ICON NOP
+47163 ICON RTE          47165 ICON RTS
+
+\ structured conditionals  +/- 256 bytes              08Apr84map
+
+\   These words implement structured conditionals for the
+\ assembler. This is a much cleaner way to express control flow
+\ than the usual technique of random jumps to nonsense labels.
+\ e.g.   D0 D0 OR  0= IF   5 # D1 ADD  ELSE  3 # D1 ADD  THEN
+\        BEGIN  A0 ) D0 MOVE  0<> WHILE  D0 A0 MOVE  REPEAT
+\        5 D3 DO   1 D6 ADDQ   LOOP
+
+\ The last is especially interesting. It will repeat the code
+\ between DO and LOOP 5 times using D3 as a counter.
+\ Note that any DBcc can replace LOOP.
+
+\ IF, WHILE, and UNTIL all expect a branch opcode on the stack.
+\ The most commonly used ones are defined here as constants named
+\ for the corresponding condition.
+
+: THEN   ?>RESOLVE  ;
+: IF      , ?>MARK  ;   HEX
+: ELSE    6000 IF  2SWAP THEN ;
+: BEGIN   ?<MARK ;
+: UNTIL   , ?<RESOLVE  ;
+: AGAIN   6000 UNTIL ;
+: WHILE   IF ;
+: REPEAT  2SWAP AGAIN THEN ;
+: DO      ?>MARK DROP [ FORTH ] SWAP ;
+: LOOP    DBRA ;
+
+6600 CONSTANT 0=   6700 CONSTANT 0<>
+6A00 CONSTANT 0<   6B00 CONSTANT 0>=
+6C00 CONSTANT <    6D00 CONSTANT >=
+6E00 CONSTANT <=   6F00 CONSTANT >
+DECIMAL

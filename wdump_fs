@@ -1,0 +1,36 @@
+\ wdump_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net)
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain all the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-01-06: Code extracted from <boot.fs>.
+
+\ ==============================================================
+
+: (wdump)  ( a n -- )
+  0 do
+    i 4 mod 0= if  dup .dump-address  then
+    dup @ 16hex. cell+
+  loop  drop  ;
+  \ Show the contents of _n_ cells starting from _a_.
+
+: wdump  ( a n -- )
+  ?dup if  (wdump)  else  drop  then  ;
+  \ Show the contents of _n_ cells starting from _a_.
+
+end-of-file
+
+\ vim: filetype=superforthsfera

@@ -1,0 +1,61 @@
+; get_mode_asm
+
+; This file is part of Sfera, a library for SuperForth
+; http://programandala.net/en.program.sfera.html
+
+; Author: Marcos Cruz (programandala.net), 2016.
+; Based on code from: Display Extensions V2.01 (last update
+; 2003-02-21) written by Dilwyn Jones.
+
+; ==============================================================
+; License
+
+; You may do whatever you want with this work, so long as you
+; retain all the copyright/authorship/acknowledgment/credit
+; notice(s) and this license in all redistributed copies and
+; derived works.  There is no warranty.
+
+; ==============================================================
+; Description
+
+; `get-mode` returns the current screen display mode.
+
+; SMSQmulator           SBASIC  Return
+; screen mode           mode    value
+; -----------           ------  ------
+; 0 (QL)                     4       0
+;                            8       8
+; 2 (Aurora, 8 bits)       n/a      16
+; 3 (16 bits)              n/a      16
+
+; ==============================================================
+; History
+
+; 2016-01-14: Start.
+
+; ==============================================================
+
+  include 'inc_macros_asm'
+  include 'inc_labels_asm'
+
+  code 'GET-MODE',get_mode_end  ; ( -- n )
+
+  move.w d2,-(sp)         ; save SuperForth's TOS
+
+  moveq   #mt_dmode,d0
+  move.b  #-1,d1          ;READ mode
+  move.b  #-1,d2          ;READ display (incidental here)
+  trap    #1
+  ; d1.b=display mode number
+  clr.l   d0              ;empty top 3 bytes
+  move.b  d1,d0           ;mode number for conversion to fp
+
+  move.w (sp)+,d2         ; restore SuperForth's TOS
+  push_w d0
+  next
+
+get_mode_end equ *
+
+  end_code_definitions
+
+  end

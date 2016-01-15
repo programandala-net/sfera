@@ -1,0 +1,149 @@
+\ floating_point_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Gerry Jackson, 1985.
+\ Origin: Code included with SuperForth.
+\ Modified by: Marcos Cruz (programandala.net), 2016.
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain all the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-01-07: Code copied from SuperForth 2.0. Layout changes.
+\
+\ 2016-01-08: Modified to use `code` and `end-code`. Stack
+\ effects, comments.  Words renamed after standard Forth.
+
+\ ==============================================================
+
+require code_fs
+
+code c_fp  ( ad n1 --- n2 )
+  3002 , 4287 , 2f09 , 2f0c , 385b ,
+  d9ca , 224b , 9dce , 3a78 , 011c ,
+  4e95 , 3400 , 2649 , 285f , 225f ,
+  3219 , 3a72 , 1000 , 4ef2 , d000 ,
+end-code
+
+code fp$ ( fp ad vec --- ad d0    )
+         (    ad vec --- fp ad d0 )
+  48e4 , 00e0 , 4287 , 3a42 , 3a55 ,
+  305b , d1ca , 224b , 9dce , 4e95 ,
+  2649 , 2408 , 4cdc , 0700 , 948a ,
+  3702 , 3400 , 3219 , 3a72 , 1000 ,
+  4ef2 , d000 ,
+end-code
+
+code fdup  ( r -- r r )
+  3702 , 272b , 0002 ,
+  3219 , 3a72 , 1000 , 4ef2 , d000 ,
+end-code
+
+code fdrop  ( r -- )
+  588b , 341b , 60e6 ,
+end-code
+
+code fswap  ( r1 r2 -- r2 r1 )
+  221b , 361b , 2a5b , 2701 , 3702 ,
+  270d , 3403 , 60cc ,
+end-code
+
+code fover  ( r1 r2 -- r1 r2 r1 )
+  3702 , 272b , 0008 , 342b , 000a ,
+  60b6 ,
+end-code
+
+code f@  ( -- r )
+  2732 , 2002 , 3432 , 2000 , 60a4 ,
+end-code
+
+code f!  ( r a -- )
+  259b , 2000 , 359b , 2004 , 341b , 6090 ,
+end-code
+
+code f>r  ( r -- ) ( R: -- r )
+  291b , 3902 , 341b , 6000 , ff80 ,
+end-code
+
+code fr>  ( -- r ) ( R: r -- )
+  3702 , 341c , 271c , 6000 , ff6e ,
+end-code
+
+: frot  ( r1 r2 r3 -- r2 r3 r1 )  f>r fswap fr> fswap  ;
+
+: fconstant  ( r "name )  2constant , does> f@  ;
+
+: fvariable  ( "name" )  2variable 0 ,  ;
+
+: f0=  ( r1 r2 -- f )  or or 0=  ;
+
+: f0<  ( r1 r2 -- f )  drop swap drop 0<  ;
+
+: f0>  ( r1 r2 -- f )   drop swap drop 0>  ;
+
+: fpr  ( u -- n2 n1 )
+  3 * 2 + 3 0  ;
+  \ XXX TODO document, factor `float` and `floats`
+
+: fpick  ( rn..r0 -- rn..r0 rn )
+  fpr do  >r r@ pick r>  loop drop  ;
+
+: froll  ( r[u] r[u-1]..r[0] u -- r[u-1]..r[0] r[u-1] )
+  fpr do  >r r@ roll r>  loop drop  ;
+
+: flop  ( n "name" -- )
+  constant does> @ 0 swap c_fp dup ?error  ;
+
+ 2 flop f>s
+ 4 flop fint
+ 6 flop f>d
+ 8 flop s>f
+10 flop f+
+12 flop f-
+14 flop f*
+16 flop f/
+18 flop fabs
+20 flop fnegate
+24 flop fcos
+26 flop fsin
+28 flop ftan
+30 flop fcot
+32 flop fasin
+34 flop facos
+36 flop fatan
+38 flop facot
+40 flop fsqrt
+42 flop fln
+44 flop flog
+46 flop fexp
+48 flop f**
+
+: f<  ( r1 r2 -- f )  f- f0<  ;
+
+: f>  ( r1 r2 -- f )  f- f0>  ;
+
+: f=  ( r1 r2 -- f )  f- f0=  ;
+
+: f.  ( r -- )  pad 240 fp$ drop pad swap pad - type space  ;
+
+: f$  ( "name" -- r )
+  bl word 1+ 256 fp$ dup ?error drop  ;
+
+f$ 65536 fconstant mi
+
+: d>f  ( d -- r )
+  >r s>f fdup f0< if  mi f+  then
+  r> s>f mi f* f+  ;
+
+end-of-file
+
+\ vim: filetype=superforthsfera

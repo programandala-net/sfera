@@ -1,0 +1,387 @@
+\ decode_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net), 2015, 2016.
+
+\ XXX UNDER DEVELOPMENT
+
+\ Last update: 20160112
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain all the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ Description
+
+\ This module provides decoding words.
+
+\ This code started with code previous versions written for Solo
+\ Forth (http://programandala.net/en.program.solo_forth.html)
+\ and Afera (http://programandala.net/en.program.afera.html).
+
+\ ==============================================================
+\ History
+
+\ See at the end of the file.
+
+\ ==============================================================
+
+forth definitions decimal
+
+require dev4_standard_endcase_fs
+
+variable decode-level  decode-level off
+  \ depth of nesting
+
+variable decode-address
+  \ in the word being decoded
+
+\ ----------------------------------------------
+\ Headerless words
+
+\ XXX TODO -- complete
+h# 8020 constant 85-cfa  ( -- n )
+h# 839A constant (do)-cfa
+h# 83AC constant (loop)-cfa
+h# 83B8 constant (+loop)-cfa
+h# 87C6 constant do-colon
+h# 879A constant do-create
+h# 877C constant do-constant
+h# 96D0 constant do-2constant
+h# 87AA constant do-user
+h# 8824 constant lit-cfa  ( -- )
+h# 88D0 constant dp-cfa
+h# 8BF0 constant (does>)-cfa
+h# 9284 constant unknown-9284-cfa
+h# 92A4 constant unknown-92a4-cfa
+h# 930E constant ?pairs-cfa  ( -- )
+h# 9860 constant unknown-9860-cfa
+h# 9874 constant unknown-9874-cfa
+h# 988C constant unknown-988c-cfa
+h# 9898 constant unknown-9898-cfa
+h# 98AE constant unknown-98ae-cfa
+h# 997A constant case-mask-cfa
+h# 99B6 constant unknown-99b6-cfa
+h# 9AC8 constant (read")-cfa
+h# 9F34 constant quote-cfa  ( -- c )
+h# 9FD2 constant unknown-9fd2-cfa
+h# 9D9A constant index-out-of-range?-cfa  ( ca n -- ca n f )
+
+\ ----------------------------------------------
+\ Checks
+
+: decode-end?  ( cfa -- f )
+  dup (does>)-cfa =  \ XXX TMP
+  swap ['] exit =  or  ;
+  \ Is the given cfa the usual end of a definition?
+
+: special-end?  ( pfa+n -- )
+\  dup ." special-end? " h.  \ XXX INFORMER
+  case
+    h# 8EA6 of  true exit  endof  \ end of `spaces`
+  endcase  false  ;
+  \ Is the given address a special end of a colon definition?
+  \ This is used to know when to stop decoding certain words
+  \ that don't end in the usual ways.
+
+: code-pfa?  ( pfa -- f )  dup body> @ =  ;
+  \ Is _pfa_ a code word?
+
+: code-cfa?  ( cfa -- f )  dup >body swap @ =  ;
+  \ Is _cfa_ a code word?
+
+: decoding?  ( pfa+n -- pfa+n cfa f )
+\  ." decoding? " dup h.  \ XXX INFORMER
+  dup special-end? 0= >r
+  dup decode-address !
+  dup @ dup ( pfa+n cfa cfa ) decode-end? 0=
+  r> and  ;
+
+\ ----------------------------------------------
+\ Printing
+
+: indent  ( -- )
+  cr decode-address @ u. decode-level @ 2* spaces  ;
+
+: indent+  ( -- )  1 decode-level +! indent  ;
+
+: headerless.name?  ( cfa -- f )
+  true swap case
+    \ XXX TODO -- complete
+    quote-cfa               of  ." quote"                endof
+    85-cfa                  of  ." 85"                   endof
+    (does>)-cfa             of  ." (does>)"              endof
+    (read")-cfa             of  ." (read" c# " emit
+                                          c# ) emit      endof
+    (loop)-cfa              of  ." (loop)"               endof
+    (do)-cfa                of  ." (do)"                 endof
+    (+loop)-cfa             of  ." (+loop)"              endof
+    lit-cfa                 of  ." lit"                  endof
+    dp-cfa                  of  ." dp"                   endof
+    ?pairs-cfa              of  ." ?pairs"               endof
+    case-mask-cfa           of  ." case-mask"            endof
+    unknown-9284-cfa        of  ." 9284-cfa"             endof
+    unknown-92a4-cfa        of  ." 92A4-cfa"             endof
+    unknown-9860-cfa        of  ." 9860-cfa"             endof
+    unknown-9874-cfa        of  ." 9874-cfa"             endof
+    unknown-988c-cfa        of  ." 988c-cfa"             endof
+    unknown-9898-cfa        of  ." 9898-cfa"             endof
+    unknown-98ae-cfa        of  ." 98ae-cfa"             endof
+    unknown-99b6-cfa        of  ." 99B6-cfa"             endof
+    unknown-9fd2-cfa        of  ." 9fd2-cfa"             endof
+    index-out-of-range?-cfa of  ." index-out-of-range?"  endof
+                    default of  0=                       endof
+  endcase  ;
+  \ Print the name of the headerless word _cfa_ and return a
+  \ true flag; if _cfa_ is not recognized, just return a false
+  \ flag.
+
+: valid-name-char?  ( c -- f )
+  dup bl > swap 128 < and  ;
+  \ Is _c_ a valid character of a Forth word?
+
+: valid-name-string?  ( ca len -- f )
+  do  i c@ valid-name-char? 0= if  false leave  then  loop  true  ;
+
+: valid-name?  ( nfa -- f )
+  name>string bounds dup
+  if    valid-name-string?
+  else  2drop false  then  ;
+
+: valid-nfa?  ( nfa -- f )
+  dup name>length? if  valid-name?  else  drop false  then  ;
+
+: cfa.name  ( cfa -- )
+  dup headerless.name?
+  if    drop
+  else  dup >name ( cfa nfa ) valid-nfa?
+        if    >link id.
+        else  drop ." Unknown headerless word"  then
+  then  ;
+
+: pfa.name  ( pfa -- )  body> cfa.name  ;
+
+: .definer-default-name  ( cfa -- )
+  code-cfa?  if  ." CODE"  else  ." ?"  then  ;
+
+: .definer-name  ( cfa -- )
+  dup @ case
+    do-colon     of  drop ." :"             endof
+    do-user      of  drop ." USER"          endof
+    do-create    of  drop ." CREATE"        endof
+    do-constant  of  drop ." CONSTANT"      endof
+    do-2constant of  drop ." 2CONSTANT"     endof
+    default      of  .definer-default-name  endof
+  endcase  space  ;
+  \ Print the name of the definer word _cfa_ was created by.
+
+: decode-header  ( pfa  -- )
+  dup body> dup decode-address !
+  indent .definer-name pfa.name  ;
+  \ Show the header of the word being decoded.
+
+: decoded  ( cfa -- pfa )
+  indent+ >body dup pfa.name  ;
+
+\ ----------------------------------------------
+\ Special cases
+
+: decode-data  ( a1 -- a2 x )
+  cell+ dup @  ;
+
+: decode-literal  ( a1 -- a2 )
+  decode-data space .  ;
+
+: decode-branch  ( a1 -- a2 )
+  decode-literal ."  \ to " dup dup @ + u.  ;
+
+: decode-compile  ( a1 -- a2 )
+  decode-data space cfa.name  ;
+
+: decode-special  ( a1 -- a1 | a2 )
+  dup @ case
+    ['] compile   of  decode-compile    endof
+    lit-cfa       of  decode-literal    endof
+    ['] branch    of  decode-branch     endof
+    ['] ?branch   of  decode-branch     endof
+    (loop)-cfa    of  decode-branch     endof
+    (+loop)-cfa   of  decode-branch     endof
+  endcase  ;
+
+\ ----------------------------------------------
+\ Step control
+
+exvec: decode-step  ( -- c )
+  \ Return the key option for every decode step.
+
+variable manual-decoding?  ( -- f )
+  \ XXX TODO use the contents of the vector instead of a flag
+
+: manual-decode  ( -- )
+  assign decode-step to-do key
+  manual-decoding? on  ;
+
+bl constant decode-step-key  \ Space bar
+27 constant decode-quit-key  \ Escape
+
+: decode-step-key!  ( c -- )
+  [ ' decode-step-key >body ] literal !  ;
+
+: automatic-decode  ( -- )
+  assign decode-step to-do decode-step-key
+  manual-decoding? off  ;
+
+manual-decode  \ default behaviour
+
+\ ----------------------------------------------
+\ Help
+
+: .decode-key  ( c -- )
+  case
+    bl of  ." Space"   endof
+    27 of  ." Escape"  endof
+  endcase  ;
+
+: decode-usage  ( -- )
+  manual-decoding? @ if
+    cr ." Keys: "
+    decode-step-key .decode-key ." =step, "
+    decode-quit-key .decode-key ." =quit, "
+    ." other=deeper." cr
+  then  ;
+
+\ ----------------------------------------------
+\ Main
+
+exvec: decode-pfa  ( pfa -- )
+  \ Decode the definition at the given pfa.
+
+: decode-nested-pfa  ( pfa -- )
+  1 decode-level +!
+  ." before " decode-level ?
+  decode-pfa
+  ." after " decode-level ?
+  -1 decode-level +!  ;
+
+\ XXX OLD
+: (decode-from)  ( a  -- )
+  begin  decoding?  while ( pfa+n cfa )
+    decoded ( pfa+n pfa' )
+    decode-step case
+      decode-quit-key of  sp! quit          endof
+      decode-step-key of  drop              endof
+             default  of decode-nested-pfa  endof
+    endcase
+    decode-special cell+  -1 decode-level +!
+  repeat  indent cell+ pfa.name drop  ; \ show the last word
+\ XXX NEW
+\ XXX TODO
+\ : (decode-from)  ( a  -- )
+\   begin  decoding?  while ( pfa+n cfa )
+\     decoded ( pfa+n pfa' )
+\   while
+\     decode-step case
+\       decode-quit-key of  sp! quit           endof
+\       decode-step-key of  drop               endof
+\               default of  decode-nested-pfa  endof
+\     endcase
+\     decode-special 
+\     cell+  -1 decode-level +!
+\   repeat  ;
+  \ Continue decoding from an arbitrary address _a_,
+  \ which is part of a parameter field of a colon word.
+
+: .data-header  ( -- )  cell decode-address +! indent+  ;
+
+: decode-user  ( pfa -- )
+  .data-header
+  ." Offset: " dup @ . ." Value: " body> execute @ .  ;
+
+: decode-constant  ( pfa -- )
+  .data-header  ." Value: " @ .  ;
+
+: decode-2constant  ( pfa -- )
+  .data-header  ." Value: " 2@ d.  ;
+
+: decode-default  ( pfa -- )
+  code-pfa? 0= if  ."  Word type not recognized" cr  then  ;
+
+: (decode-pfa)  ( pfa -- )
+  dup decode-header
+  dup body> @ case
+    do-colon      of  (decode-from)     endof
+    do-user       of  decode-user       endof
+    do-create     of  drop              endof  \ XXX TODO -- improve
+    do-constant   of  decode-constant   endof
+    do-2constant  of  decode-2constant  endof
+         default  of  decode-default    endof
+  endcase  ;
+  \ Decode the definition at _pfa_.
+
+: init-decode  ( -- )  decode-usage  decode-level off  ;
+
+\ ----------------------------------------------
+\ Interface
+
+assign decode-pfa to-do (decode-pfa)  ( pfa -- )
+  \ Decode the definition at _pfa_.
+
+: decode-from  ( a  -- )
+  init-decode  (decode-from)  ;
+  \ Start decoding from an arbitrary address _a_,
+  \ which is part of a parameter field of a colon word.
+
+: decode-cfa  ( cfa -- )
+  >body decode-pfa  ;
+  \ Decode the definition at _cfa_.
+
+: decode  ( "name" -- )
+  defined 0= 0 ?error  init-decode decode-cfa  ;
+  \ Decode the word "name".
+
+: decode-all  ( -- )
+  automatic-decode init-decode
+  ['] forth-83  \ top word of the system dictionary
+  begin   dup decode-cfa cr
+          dup >link link>link?
+  while   link>
+  repeat  drop  manual-decode ;
+  \ Decode all SuperForth words.
+
+end-of-file
+
+\ ==============================================================
+\ History
+
+\ 2015-12-31: Code copied from Solo Forth to the boot file of
+\ Sfera.
+\
+\ 2016-01-01..05: Changes to adapt the code.
+\
+\ 2016-01-06: Code extracted from <boot.fs>.  Fixed: `endcase`
+\ is not standard and needs `default` or drop the value. First
+\ working version. Improved with automatic control. Support for
+\ headerless words.
+\
+\ 2016-01-07: Factored `decode-from` out from `decode-pfa`, in
+\ order to decode from an arbitrary address. An execution vector
+\ was needed in order to replicate the recursion of the previous
+\ version of `decode-pfa`.
+\
+\ 2016-01-08: Improvement: support for variables, user
+\ variables, constant, and double constants.
+\
+\ 2016-01-09: Improvement: support for code words. Improvement:
+\ invalid names caused by headerless words are detected and a
+\ warning is shown instead, they don't cause trouble anymore.
+\
+\ 2016-01-12: Updated: `link>link?` instead of `first-word? 0=`.
+
+\ vim: filetype=superforthsfera

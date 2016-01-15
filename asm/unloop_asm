@@ -1,0 +1,41 @@
+; unloop_asm
+
+; This file is part of Sfera, a library for SuperForth
+; http://programandala.net/en.program.sfera.html
+
+; Author: Marcos Cruz (programandala.net), 2015.
+
+; ==============================================================
+; License
+
+; You may do whatever you want with this work, so long as you
+; retain all the copyright/authorship/acknowledgment/credit
+; notice(s) and this license in all redistributed copies and
+; derived works.  There is no warranty.
+
+; ==============================================================
+; History
+
+; 2016-01-09: Written.
+; 2016-01-15: Fixed the stack effect. Added the Forth
+; definition.
+
+; ==============================================================
+
+  include 'inc_macros_asm'
+
+; : unloop  ( R: loop-sys -- )  r> r> r> r> 2drop >r >r  ;
+
+  code 'UNLOOP',unloop_end  ; ( R: loop-sys -- )
+
+  adda.l #4,a4
+
+  next
+
+unloop_end equ *
+
+  end_code_definitions
+
+  end
+
+

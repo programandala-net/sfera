@@ -1,0 +1,42 @@
+\ adump_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net), 2016
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain all the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-01-11: Start.
+\ 2016-01-15: Fixed.
+
+\ ==============================================================
+
+: (adump)  ( da len -- )
+  8 2dup mod - + 8 / 0
+  do
+    2dup cr 32hex. space
+    2dup 8 0 do  i s->d d+ 2dup ac@ 8hex. loop  2drop
+    2dup 8 0 do  i s->d d+ 2dup ac@ emit  loop  2drop
+  8. d+ loop  2drop  ;
+  \ Show the contents of _len_ bytes starting from absolute
+  \ address _da_.
+
+: adump  ( da len -- )
+  ?dup if  (adump)  else  2drop  then  ;
+  \ Show the contents of _len_ bytes starting from absolute
+  \ address _da_.
+
+end-of-file
+
+\ vim: filetype=superforthsfera
+

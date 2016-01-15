@@ -1,0 +1,89 @@
+= Sfera TO-DO
+:revdate: 2016-01-15
+
+// This file is part of Sfera, a library for SuperForth
+// http://programandala.net/en.program.sfera.html
+
+// You may do whatever you want with this work, so long as you
+// retain all the copyright/authorship/acknowledgment/credit
+// notice(s) and this license in all redistributed copies and
+// derived works.  There is no warranty.
+
+// This file is written in AsciiDoc/Asciidoctor format
+// (http://asciidoctor.org)
+
+2016-01-03:
+
+Write:
+
+  boot-device  ( -- ca len )
+  \ Return the current boot device.
+
+2016-01-05:
+
+Undocumented words:
+
+----
+  #mdv
+  bp
+  pk
+  c_mt
+  call3*
+  call3*a
+  call_mt
+  call_vu
+  csor
+  fs_load
+  graphics
+  ipc  \ called by `keyrow`
+  j_s
+  kr \ called by `keyrow`
+  ld_job 
+  sl
+  sw
+  to_pad
+  trap3
+  trap3*
+  v_ok
+  vec_ut
+----
+  
+Note: It seems vocabularies are chained, like in fig-Forth.
+
+Doubt: User variables, but no `user`?
+
+Write a code word to change the font.
+
+2016-01-06:
+
+Implement `warnings`, maybe by hacking `(error)`.
+
+2016-01-09:
+
+Implement paths.
+
+2016-01-10:
+
+Note: It seems the execution of a vocabulary makes it the first
+vocabulary to be searched, and then the vocabulary it was created in,
+and so on.
+
+2016-01-11:
+
+Rename the original word `s->d` to `s>d`.  But first `>name` has to be
+adapted, in order to skip several padding bytes.  Then rename also
+`s->d` to `s>d`.
+
+2016-01-14:
+
+Write a standard `parse-name`, which returns a string directly from
+the input buffer.
+
+2016-01-15:
+
+Fix: share <printout.txt>. Or create a new file every time, with a
+unique name (time string and job id).
+
+Write a tool to rename all original words, replacing "_" with "-".
+Since standard Forth words does not use underscores, it seems
+desirable to homogenize the whole dictionary. 

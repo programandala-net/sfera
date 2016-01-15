@@ -1,0 +1,44 @@
+; tuck_asm
+
+; This file is part of Sfera, a library for SuperForth
+; http://programandala.net/en.program.sfera.html
+
+; Author: Marcos Cruz (programandala.net), 2015.
+
+; ==============================================================
+; License
+
+; You may do whatever you want with this work, so long as you
+; retain all the copyright/authorship/acknowledgment/credit
+; notice(s) and this license in all redistributed copies and
+; derived works.  There is no warranty.
+
+; ==============================================================
+; History
+
+; 2016-01-11: Written.
+
+; ==============================================================
+
+  include 'inc_macros_asm'
+
+  code 'TUCK',tuck_end  ; ( x1 x2 -- x2 x1 x2 )
+
+;  move.w (a3)+,d0  ; x1 -> d0
+;  move.w d2,-(a3)  ; push x2
+;  move.w d0,-(a3)  ; push x1
+
+; XXX Faster? (code size doesn't change):
+
+  move.w (a3),d0   ; x1 -> d0
+  move.w d2,(a3)   ; x2 -> NOS
+  move.w d0,-(a3)  ; push x1
+
+  next
+
+tuck_end equ *
+
+  end_code_definitions
+
+  end
+

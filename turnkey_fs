@@ -1,0 +1,64 @@
+\ turnkey_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Gerry Jackson, 1985.
+\ Modified by Marcos Cruz (programandala.net), 2016.
+
+\ XXX UNDER DEVELOPMENT
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain all the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-01-12: Code copied from SuperForth 2.0. Layout changes.
+\ Renamed words. Did some changes after Sfera. Added stack
+\ comments. Fixed `map`.
+\
+\ 2016-01-15: First tries. Some notes.
+
+\ ==============================================================
+
+: map  ( -- )
+  here 8 + 32856 ! 1550 allot  \ block buffer and stack
+  here 32834 !
+  here 32838 !
+  latest ['] cold 4 + !
+  fence 2+ @ 32840 !  ;   \ voc-link
+
+: dename  ( -- )
+  forth latest
+  begin
+    dup link>name dup c@ /name and erase
+    link>link? 0=
+  until  ;
+
+: turnkey ( cfa -- )
+  ['] cold 62 + ! cls
+  ." How much data space? " query bl-word number d->s cr cr
+  ." Return to SuperBASIC with CTRL C, then type:" cr cr
+  ." sexec <filename>," 32776 2@ 4096. d- d.
+  ." ," here 32768 - 4096 + u. ." ," u. cr cr  ;
+
+: save-application  ( "name" -- )
+  map ' turnkey dename
+  ." Then remove SuperForth since it cannot be re-entered." cr cr
+  sleep  ;
+  \ XXX FIXME -- this works, but the new program,
+  \ after executing "name", tries to boot as usual, and the
+  \ patched boot device was not preserved, so BLK1 is not found.
+
+: save-system  ( -- )
+  ['] empty-buffers turnkey  ;
+  \ XXX FIXME -- the system is saved, but only words of the
+  \ original system are preserved, even after setting `fence`.
+
+end-of-file

@@ -1,0 +1,31 @@
+\ decode_unknown.fs
+\ 2016-01-06 19:13 +0100
+
+bl automatic-decode
+printer_on
+decode #mdv
+decode bp
+decode pk
+decode c_mt
+decode call3*
+decode call3*a
+decode call_mt
+decode call_vu
+decode csor
+decode fs_load
+decode graphics
+decode j_s
+decode kr
+decode ld_job
+decode sl
+decode sw
+decode to_pad
+decode trap3
+decode trap3*
+decode v_ok
+decode vec_ut
+printer_off
+
+end-of-file
+
+\ vim: filetype=superforth

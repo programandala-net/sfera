@@ -1,0 +1,61 @@
+\ code_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net)
+
+\ XXX UNDER DEVELOPMENT
+
+\ Last update: 2016-01-08 19:03 +0100
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain all the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-01-08: Start.
+
+\ ==============================================================
+
+[undefined] assembler [if]
+  vocabulary assembler
+[then]
+
+current @
+assembler definitions
+
+variable abase  \ backup of `base`
+
+: asm  ( -- )
+  \ !csp  \ XXX TODO
+  base @ abase !  hex
+  \ also assembler  \ XXX TODO
+  ;
+  \ Start assembler mode.
+
+: end-asm  ( -- )
+  \ ?csp  \ XXX TODO
+  abase @ base !
+  \ previous  \ XXX TODO
+  ;
+  \ End assembler mode.
+
+: code  ( "name" -- )  create-code asm  ;
+  \ Define a code word "name".
+
+: end-code  ( -- )
+  end-asm  ;
+  \ End the definition of a code word.
+
+current !
+
+end-of-file
+
+\ vim: filetype=superforthsfera

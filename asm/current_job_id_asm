@@ -1,0 +1,47 @@
+; current_job_id_asm
+
+; This file is part of Sfera, a library for SuperForth
+; http://programandala.net/en.program.sfera.html
+
+; Author: Marcos Cruz (programandala.net), 2016.
+
+; ==============================================================
+; License
+
+; You may do whatever you want with this work, so long as you
+; retain all the copyright/authorship/acknowledgment/credit
+; notice(s) and this license in all redistributed copies and
+; derived works.  There is no warranty.
+
+; ==============================================================
+; History
+
+; 2016-01-15: Written.
+
+; ==============================================================
+
+  include 'inc_macros_asm'
+  include 'inc_labels_asm'
+
+  code 'CURRENT-JOB-ID',current_job_id_end  ; ( -- d )
+
+  ; d = current job id
+
+  move.l a0,-(sp)   ; save the SuperForth a0
+  move.w d2,-(sp)   ; save the SuperForth TOS
+
+  moveq #mt_inf,d0
+  trap #1
+  ; d1 = current job id
+
+  move.w (sp)+,d2   ; restore the SuperForth TOS
+  move.l (sp)+,a0   ; restore the SuperForth a0
+  push_l d1         ; result
+
+  next
+
+current_job_id_end equ *
+
+  end_code_definitions
+
+  end

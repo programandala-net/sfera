@@ -1,0 +1,70 @@
+\ standard_endcase_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Auchor: Marcos Cruz (programandala.net), 2016.
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain all the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ Description
+
+\ SuperForth's `endcase` is not the original Eaker's structure,
+\ which become popular after being firt published in 1980, and
+\ which was adopted by the Forth-94 Standard.
+\
+\ The difference is SuperForth's `endcase` does not consume the
+\ case selector, but consumes it with a custom word called
+\ `default`, which is mandatory even when there's no default
+\ code in the structure.  This implementation is versatile and
+\ makes the coding of default case simple.
+
+\ This file is provided as an alternative for compatibility with
+\ standard Forth. It replaces the original `endcase` with a
+\ standard version and modifies SuperForth's `default`
+\ accordingly.
+
+\ ==============================================================
+\ Usage
+
+\ SuperForth `case` structure:
+
+\   n case
+\     x1 of  ...  endof
+\     x2 of  ...  endof
+\     default ...  \ *mandatory* default case, even empty
+\   endcase
+
+\ Modified version after standard Forth:
+
+\   n case
+\     x1 of  ...  endof
+\     x2 of  ...  endof
+\     default of  ...  endof  \ *optional* default case
+\   endcase
+
+\ ==============================================================
+\ History
+
+\ 2016-01-15: Code extracted from the main file of the library.
+
+\ ==============================================================
+
+\ Make `endcase` standard:
+
+: endcase  ( n -- )
+  ?comp postpone drop postpone endcase  ; immediate
+  \ Standard `endcase`.
+
+\ Adapt SuperForth's `default` to the standard syntax:
+
+' dup 38752 !  \ hack `default` to compile `dup` instead of `drop`
+
+\ vim: filetype=superforthsfera

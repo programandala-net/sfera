@@ -1,0 +1,40 @@
+; three_dup_asm
+
+; This file is part of Sfera, a library for SuperForth
+; http://programandala.net/en.program.sfera.html
+
+; Author: Gerry Jackson, 1985.
+; Origin: Code included with SuperForth.
+; Modified by: Marcos Cruz (programandala.net), 2015.
+
+; ==============================================================
+; License
+
+; You may do whatever you want with this work, so long as you
+; retain all the copyright/authorship/acknowledgment/credit
+; notice(s) and this license in all redistributed copies and
+; derived works.  There is no warranty.
+
+; ==============================================================
+; History
+
+; 2016-01-09: Code copied from SuperForth 2.0. Modified for the
+; asmx assembler (http://xi6.com/projects/asmx/)
+
+; ==============================================================
+
+  include 'inc_macros_asm'
+
+  code '3DUP',three_dup_end  ; ( x1 x2 x3 -- x1 x2 x3 x1 x2 x3 )
+
+  move.w d2,-(a3)             ; push top of stack
+  move.w 4(a3),-(a3)
+  move.w 4(a3),-(a3)          ; d2 is ok
+
+  next
+
+three_dup_end equ *
+
+  end_code_definitions
+
+  end

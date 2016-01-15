@@ -1,0 +1,40 @@
+; floats_asm
+
+; This file is part of Sfera, a library for SuperForth
+; http://programandala.net/en.program.sfera.html
+
+; Author: Marcos Cruz (programandala.net), 2015.
+
+; ==============================================================
+; License
+
+; You may do whatever you want with this work, so long as you
+; retain all the copyright/authorship/acknowledgment/credit
+; notice(s) and this license in all redistributed copies and
+; derived works.  There is no warranty.
+
+; ==============================================================
+; History
+
+; 2016-01-11: Written.
+
+; ==============================================================
+
+  include 'inc_macros_asm'
+
+  code 'FLOATS',floats_end  ; ( n1 -- n2 )
+
+  ; _n2_ is the size in address units of _n1_ floating numbers.
+
+  move.l d2,d1
+  add.l d1,d1
+  add.l d1,d2
+
+  next
+
+floats_end equ *
+
+  end_code_definitions
+
+  end
+

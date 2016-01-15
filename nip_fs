@@ -1,0 +1,29 @@
+\ nip_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net), 2016.
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain all the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-01-11: Start.
+\ 2016-01-15: Updated.
+
+\ ==============================================================
+
+\ XXX TMP paths
+\ XXX TODO -- use the path system, when available
+require dev4_include_code_fs
+require-code dev5_nip_bin
+
+\ vim: filetype=superforthsfera
