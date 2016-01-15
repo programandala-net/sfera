@@ -1,7 +1,7 @@
 ( boot_fs )
 
 ( This file is part of Sfera, a library for SuperForth )
-( Version: 0.0.0+20160115 )
+( Version: 0.1.1+20160115 )
 ( http://programandala.net/en.program.sfera.html )
 
 ( Author: Marcos Cruz [programandala.net] )
