@@ -1,4 +1,4 @@
-; screen_size_asm
+; display_size_asm
 
 ; This file is part of Sfera, a library for SuperForth
 ; http://programandala.net/en.program.sfera.html
@@ -9,21 +9,13 @@
 ; update 2003-02-21), written by Dilwyn Jones
 ; <http://dilwyn.me.uk>.
 
-; Last update: 201601151821
-
 ; ==============================================================
 ; License
 
 ; You may do whatever you want with this work, so long as you
-; retain all the copyright/authorship/acknowledgment/credit
+; retain the copyright/authorship/acknowledgment/credit
 ; notice(s) and this license in all redistributed copies and
 ; derived works.  There is no warranty.
-
-; ==============================================================
-; Description
-
-; `screen-size` returns the width and heigth of the screen. It
-; works only on SMSQ/E.
 
 ; ==============================================================
 ; History
@@ -31,13 +23,18 @@
 ; 2016-01-14: Written.
 ; 2016-01-15: Fixed the description. Added more detailed
 ; credits.
+; 2016-01-23: Renamed `screen-size` to `get-display-size`.
+; 2016-01-25: Renamed to `display-size`; no need for
+; `set-display-size`.
 
 ; ==============================================================
 
   include 'inc_macros_asm'
   include 'inc_labels_asm'
 
-  code 'SCREEN-SIZE',screen_size_end  ; ( -- x y )
+  code 'DISPLAY-SIZE',display_size_end  ; ( -- x y )
+
+  ; Return the width and heigth of the display (on SMSQ/E only).
 
   move.l  a0,-(sp)          ; save SuperForth's a0
 
@@ -54,7 +51,7 @@
 
   next
 
-screen_size_end equ *
+display_size_end equ *
 
   end_code_definitions
 

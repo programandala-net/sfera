@@ -1,12 +1,12 @@
 = Sfera
 :author: Marcos Cruz (programandala.net)
-:revdate: 2016-01-15
+:revdate: 2016-01-26
 
 // This file is part of Sfera, a library for SuperForth
 // http://programandala.net/en.program.sfera.html
 
 // You may do whatever you want with this work, so long as you
-// retain all the copyright/authorship/acknowledgment/credit
+// retain the copyright/authorship/acknowledgment/credit
 // notice(s) and this license in all redistributed copies and
 // derived works.  There is no warranty.
 
@@ -23,15 +23,16 @@ Digital Precision in 1985.
 - http://programandala.net/en.program.sfera.history.html[Sfera
   development history]
 
-The development is done on Raspbian and the testings are done on
-http://www.wlenerz.com/SMSQmulator/[SMSQmulator].
+The development is done on http://raspbian.org[Raspbian] and the
+testings are done on http://www.wlenerz.com/SMSQmulator/[SMSQmulator].
 
-== Files
+== Directories and files
 
 sfera/:: Main directory.
 sfera/README.adoc:: This file.
-sfera/TO-DO.adoc:: To-do tasks.
+sfera/TO-DO.adoc:: To-do tasks, unfinished features, known issues.
 sfera/LICENSE.txt:: The license.
+sfera/VERSIONS.txt:: Versions history.
 sfera/boot_fs:: Main file of the library.
 sfera/:: Sources of words written in Forth (_fs extension).
 sfera/asm/:: Sources of words written in assembly (_asm extension)
@@ -40,80 +41,10 @@ sfera/bin/:: Binaries of words written in assembly (_bin extension).
 
 == QL devices
 
-At the moment, the following devices are used by the <boot_fs> file,
-and they must be configured in your QDOS or SMSQ/E system:
+At the moment, the following devices are used in the sources, and they
+must be configured in your QDOS or SMSQ/E system:
 
 ----
 dev_use 4, "path_to_sfera_"
 dev_use 5, "path_to_sfera_bin_"
 ----
-
-== Versions
-
-=== 0.0.0
-
-First development phase. Started from a simple boot file.
-Developed from 2015-12-31 to 2016-01-14.
-
-=== 0.1.0+20160115
-
-First usable version.
-
-The main words are defined in the <boot_fs> file. Optional words are
-in Forth or binary files.
-
-==== Main features
-
-- `code`, `end-code`, `next,` and other basic words to facilitate
-  creating machine code definitions.
-- Set of standard address arithmetic words.
-- Set of header addresses words.
-- New operators and stack words.
-- Nestable `include`, `included`; non-nestable versions `include-code`
-  and `included-code` for assembled binary files.
-- Nestable `require`, `required`; non-nestable versions `require-code`
-  and `required-code` for assembled binary files.
-- Tool modules: `dump`, `wdump`, `adump`, `decode` (some fixes
-  pending).
-- Floating point module updated with standard names, and some comus
-  addons.
-- New parsing and compiling words, like `postpone`.
-- Basic initial support for standard strings.
-- Numeric prefixes: `c#`, `h#`, `d#`, `b#`.
-- Fixed two name clashes: `char` is renamed to `chr@` and `unused`
-  is renamed to `spared`. Standard `char` and `unused` are provided.
-- New string operators which work with ordinary counted strings
-  (the SuperForth string operators work only with its own format,
-  which include the maximum length).
-- Conditional compilation.
-- Standard `endcase`.
-- Words to facilitate reading the keyboard.
-- Words to facilitate managing the windows: `set-window`, `window`,
-  `set-main-window`...
-- `boot` reboots the Forth system.
-- Standard `value` (single-cell values only).
-- System information words: `screen-size`, `get-mode`, `sys-vars`,
-  `current-job-id`.....
-
-=== 0.1.1+20160115
-
-- Fix: Removed a missing old file loaded from <boot_fs>.
-- Change: Updated some file headers.
-
-==== Unfinished, known issues
-
-A lot. See <TO-DO.adoc>, but there are many more issues noted in the
-sources (search them for "XXX" marks).  Besides, some Forth and
-assembly source files are not finished yet (they include a note).
-
-Some words are defined in the <boot_fs> file, but also in their own
-files, because it's not yet decided wether they will be part of the
-library core or optional.
-
-`nip` is defined in machine code in the core, but it also has a
-<nip_fs> file which loads the assembled binary. This is just an idea
-for a future version: create a _fs file for every _bin file. This way
-the programmer does not need to know wether a word or module is
-written in Forth or in assembly.
-
-No documentation yet.

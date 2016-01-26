@@ -10,7 +10,7 @@
 ; License
 
 ; You may do whatever you want with this work, so long as you
-; retain all the copyright/authorship/acknowledgment/credit
+; retain the copyright/authorship/acknowledgment/credit
 ; notice(s) and this license in all redistributed copies and
 ; derived works.  There is no warranty.
 
@@ -18,6 +18,7 @@
 ; History
 
 ; 2016-01-16: Written.
+; 2016-01-22: Note on localized versions of QDOS.
 
 ; ==============================================================
 
@@ -27,6 +28,9 @@
   code 'OS-VERSION',os_version_end  ; ( -- d )
 
   ; d = OS version in ASCII (n.nn)
+
+  ; Note: on localized versions of QDOS, the dot is a letter
+  ; that represents the language.
 
   move.l a0,-(sp)   ; save the SuperForth a0
   move.w d2,-(sp)   ; save the SuperForth TOS
@@ -45,5 +49,3 @@ os_version_end equ *
   end_code_definitions
 
   end
-
-

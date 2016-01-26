@@ -1,0 +1,64 @@
+                        ; aunused_asm
+
+                        ; This file is part of Sfera, a library for SuperForth
+                        ; http://programandala.net/en.program.sfera.html
+
+                        ; Author: Marcos Cruz (programandala.net), 2016.
+
+                        ; ==============================================================
+                        ; License
+
+                        ; You may do whatever you want with this work, so long as you
+                        ; retain the copyright/authorship/acknowledgment/credit
+                        ; notice(s) and this license in all redistributed copies and
+                        ; derived works.  There is no warranty.
+
+                        ; ==============================================================
+                        ; Description
+
+                        ; Find largest contigous free space that may be allocated in
+                        ; transient prog area.
+
+                        ; ==============================================================
+                        ; History
+
+                        ; 2016-01-22: Written.
+                        ;
+                        ; 2016-01-23: Rewritten, after the SMSQ/E sources. The previous
+                        ; method (after Mark J Swift's PDTK and Norman Dumbar's DJTK)
+                        ; returned the unused space usable by SuperBASIC.
+                        ;
+                        ; 2016-01-26: Updated comments and header.
+
+                        ; ==============================================================
+
+000000                    include 'inc_macros_asm'
+                          list off
+                          list nosym
+                          list notemp
+                          list on
+
+000000                    end
+000000                    include 'inc_labels_asm'
+                          list off
+                          list on
+000000                    end
+
+000000                    code 'aunused',aunused_end  ; ( -- d )
+
+00000C 48E7 20F0          movem.l     a0-a3/d2,-(sp)  ; save the SuperForth registers
+000010 7006               moveq #sms_frtp,d0
+000012 4E41               trap  #1
+000014 4CDF 0F04          movem.l (sp)+,a0-a3/d2      ; restore the SuperForth registers
+000018                    push_l d1                   ; result
+
+000020                    next
+
+       = 00002A         aunused_end equ *
+
+00002A                    end_code_definitions
+
+00002C                    end
+
+00000 Total Error(s)
+

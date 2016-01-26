@@ -1,24 +1,8 @@
-; inc_labels_asm
+  list off
 
-; This file is part of Sfera, a library for SuperForth
-; http://programandala.net/en.program.sfera.html
+; QDOS SMSQ/E keys
 
 ; Compiled by: Marcos Cruz (programandala.net), 2016
-
-; Last update: 201601151726
-
-; ==============================================================
-; License
-
-; You may do whatever you want with this work, so long as you
-; retain all the copyright/authorship/acknowledgment/credit
-; notice(s) and this license in all redistributed copies and
-; derived works.  There is no warranty.
-
-; ==============================================================
-; Description
-
-; Keys for QDOS and SMSQ/E.
 
 ; ==============================================================
 ; Acknowledgment
@@ -36,9 +20,20 @@
 ; ==============================================================
 ; History
 
-; 2016-01-11: Added to the library.
+; 2016-01-11: Added to the Sfera library.
+;
 ; 2016-01-14: Reorganized. Titles.
+;
 ; 2016-01-15: Added URLs to the credits.
+;
+; 2016-01-18: Modified in order to reuse it for other projects.
+;
+; 2016-01-22: Added SMS2 IOSS operations (file qdos.io from the
+; SMSQ/E sources). Added QDOS errors (from "QDOS Low-Level
+; Documentation", by unknown author; and from the sources of
+; ToolKit III, by Martin Berndt, Ultrasoft.)
+;
+; 2016-01-24: Updated.
 
 ; ==============================================================
 ; Traps
@@ -46,11 +41,13 @@
 ; ----------------------------------------------
 ; Manager traps (trap #1)
 
+; QDOS
+
 mt_inf        equ   $00000000
-mt_cjob       equ   $00000001
+mt_cjob       equ   $00000001 ; transient program area, allocate
 mt_jinf       equ   $00000002
 mt_rjob       equ   $00000004
-mt_frjob      equ   $00000005
+mt_frjob      equ   $00000005 ; transient program area, release
 mt_free       equ   $00000006
 mt_trapv      equ   $00000007
 mt_susjb      equ   $00000008
@@ -59,18 +56,18 @@ mt_activ      equ   $0000000a
 mt_prior      equ   $0000000b
 mt_alloc      equ   $0000000c
 mt_lnkfr      equ   $0000000d
-mt_alres      equ   $0000000e
-mt_reres      equ   $0000000f
+mt_alres      equ   $0000000e ; resident procedure area, allocate
+mt_reres      equ   $0000000f ; resident procedure area, total release only
 mt_dmode      equ   $00000010
 mt_ipcom      equ   $00000011
 mt_baud       equ   $00000012
 mt_rclck      equ   $00000013
 mt_sclck      equ   $00000014
 mt_aclck      equ   $00000015
-mt_albas      equ   $00000016
-mt_rebas      equ   $00000017
-mt_alchp      equ   $00000018
-mt_rechp      equ   $00000019
+mt_albas      equ   $00000016 ; SuperBASIC area, for interpreter only
+mt_rebas      equ   $00000017 ; SuperBASIC area, for interpreter only
+mt_alchp      equ   $00000018 ; common heap area
+mt_rechp      equ   $00000019 ; common heap area, also released when owner job is deleted
 mt_lxint      equ   $0000001a
 mt_rxint      equ   $0000001b
 mt_lpoll      equ   $0000001c
@@ -82,16 +79,96 @@ mt_riod       equ   $00000021
 mt_ldd        equ   $00000022
 mt_rdd        equ   $00000023
 
+; SMSQ/E
+
+sms_info equ $00          ; get INFOrmation on SMS                             10
+sms_crjb equ $01          ; CReate JoB                                          5
+sms_injb equ $02          ; get INformation on JoB                             11
+sms_rmjb equ $04          ; ReMove JoB                                         17
+sms_frjb equ $05          ; Forced Remove JoB                                   7
+sms_frtp equ $06          ; find largest FRee space in TPa                      8
+sms_exv  equ $07          ; set EXception Vector                                6
+sms_ssjb equ $08          ; SuSpend a JoB                                      21
+sms_usjb equ $09          ; UnSuspend a JoB                                    22
+sms_acjb equ $0a          ; ACtivate a JoB                                      1
+sms_spjb equ $0b          ; Set Priority of JoB                                20
+sms_alhp equ $0c          ; ALlocate in HeaP                                    2
+sms_rehp equ $0d          ; RElease to HeaP                                    16
+sms_arpa equ $0e          ; Allocate in Resident Procedure Area                 3
+sms_dmod equ $10          ; set or read the Display MODe                        6
+sms_hdop equ $11          ; do a Hardware Dependent OPeration                   9
+sms_comm equ $12          ; set COMMuncation baud rate etc.                     4
+sms_rrtc equ $13          ; Read Real Time Clock                               18
+sms_srtc equ $14          ; Set Real Time Clock                                21
+sms_artc equ $15          ; Adjust Real Time Clock                              3
+sms_ampa equ $16          ; Allocate space in SuperBASIC area                   2
+sms_rmpa equ $17          ; Release space in SuperBASIC area                   18
+sms_achp equ $18          ; Allocate space in Common HeaP                       1
+sms_rchp equ $19          ; Release space in Common HeaP                       16
+sms_lexi equ $1a          ; Link in EXternal Interrupt action                  12
+sms_rexi equ $1b          ; Remove EXternal Interrupt action                   17
+sms_lpol equ $1c          ; Link in POLled action                              12
+sms_rpol equ $1d          ; Remove POLled action                               17
+sms_lshd equ $1e          ; Link in ScHeDuler action                           12
+sms_rshd equ $1f          ; Remove ScHeDuler action                            17
+sms_liod equ $20          ; Link in IO Device driver                           12
+sms_riod equ $21          ; Remove IO Device driver                            17
+sms_lfsd equ $22          ; Link in Filing System Device driver                12
+sms_rfsd equ $23          ; Remove Filing System Device driver                 17
+sms_trns equ $24          ; Set translation and error messages                 22
+sms_xtop equ $25          ; External Operation [SMSQ]                          24
+sms_lthg equ $26          ; Link in THinG [SMS2,EXT]                           13
+sms_rthg equ $27          ; Remove THinG [SMS2,EXT]                            19
+sms_uthg equ $28          ; Use THinG [SMS2,EXT]                               23
+sms_fthg equ $29          ; Free THinG [SMS2,EXT]                               8
+sms_zthg equ $2a          ; Zap THinG [SMS2,EXT]                               24
+sms_nthg equ $2b          ; Next THinG [SMS2,EXT]                              14
+sms_nthu equ $2c          ; Next Thing User [SMS2,EXT]                         15
+sms_iopr equ $2e          ; IO PRiority [SMSQ]                                 11
+sms_cach equ $2f          ; CACHe handling [SMSQ]                               4
+sms_lldm equ $30          ; Link in Language Dependent Module [SMSQ]   Section 19
+sms_lenq equ $31          ; Language ENQuiry [SMSQ]                    Section 19
+sms_lset equ $32          ; Language SET [SMSQ]                        Section 19
+sms_pset equ $33          ; Printer translate SET [SMSQ]               Section 19
+sms_mptr equ $34          ; find a Message PoinTeR [SMSQ]              Section 19
+sms_fprm equ $35          ; Find PReferred Module [SMSQ]               Section 19
+sms_schp equ $38          ; Shrink alloaction in common heap [SMSQ]            19
+sms_sevt equ $3a          ; Send event to job [SMSQ]                           20
+sms_wevt equ $3b          ; Wait for event [SMSQ]                              23
+
 ; ----------------------------------------------
 ; IO allocation traps (trap #2)
+
+; QDOS
 
 io_open       equ   $00000001
 io_close      equ   $00000002
 io_formt      equ   $00000003
 io_delet      equ   $00000004
 
+; SMS
+
+
+do_ioa   equ 2                     ; trap #2
+do_rlioa equ 4                     ; trap #4
+
+ioa_open equ $01                   ; OPEN IOSS channel
+ioa_clos equ $02                   ; CLOSe IOSS channel
+ioa_frmt equ $03                   ; FoRMaT medium on device
+ioa_delf equ $04                   ; DELete file from device
+ioa_sown equ $05                   ; Set OWNer of channel
+ioa_cnam equ $06                   ; Fetch channel name
+
+; Ownership keys
+
+no_owner equ 0
+myself   equ -1
+
+
 ; ----------------------------------------------
 ; Serial IO calls (trap #3)
+
+; QDOS
 
 io_pend       equ   $00000000
 io_fbyte      equ   $00000001
@@ -100,6 +177,89 @@ io_fstrg      equ   $00000003
 io_edlin      equ   $00000004
 io_sbyte      equ   $00000005
 io_sstrg      equ   $00000007
+
+; SMS
+
+do_io equ 3                    ; trap #3
+do_relio equ 4                    ; trap #4
+
+iob_test equ $00                  ; TEST input
+iob_fbyt equ $01                  ; Fetch BYTe from input
+iob_flin equ $02                  ; Fetch LINe from input
+iob_fmul equ $03                  ; Fetch MULtiple characters/bytes
+iob_elin equ $04                  ; Edit LINe of characters
+iob_sbyt equ $05                  ; Send BYTe to output
+iob_smul equ $07                  ; Send MULtiple bytes
+
+iow_xtop equ $09                  ; eXTernal OPeration on screen
+iow_pixq equ $0a                  ; PIXel coordinate Query
+iow_chrq equ $0b                  ; CHaRacter coordinate Query
+iow_defb equ $0c                  ; DEFine Border
+iow_defw equ $0d                  ; DEFine Window
+iow_ecur equ $0e                  ; Enable CURsor
+iow_dcur equ $0f                  ; Disable CURsor
+iow_scur equ $10                  ; Set CURsor position (character coordinates)
+iow_scol equ $11                  ; Set cursor COLumn
+iow_newl equ $12                  ; put cursor on a NEW Line
+iow_pcol equ $13                  ; move cursor to Previous COLumn
+iow_ncol equ $14                  ; move cursor to Next COLumn
+iow_prow equ $15                  ; move cursor to Prevous ROW
+iow_nrow equ $16                  ; move cursor to Next ROW
+iow_spix equ $17                  ; Set cursor to PIXel position
+iow_scra equ $18                  ; SCRoll All of window
+iow_scrt equ $19                  ; SCRoll Top of window (above cursor)
+iow_scrb equ $1a                  ; SCRoll Bottom of window (below cursor)
+iow_pana equ $1b                  ; PAN All of window
+iow_panl equ $1e                  ; PAN cursor Line
+iow_panr equ $1f                  ; PAN Right hand end of cursor line
+iow_clra equ $20                  ; CLeaR All of window
+iow_clrt equ $21                  ; CLeaR Top of window (above cursor)
+iow_clrb equ $22                  ; CLeaR Bottom of window (below cursor)
+iow_clrl equ $23                  ; CLeaR cursor Line
+iow_clrr equ $24                  ; CLeaR Right hand side of cursor line
+iow_font equ $25                  ; set / read FOuNT (font U.S.A.)
+iow_rclr equ $26                  ; ReCoLouR a window
+iow_spap equ $27                  ; Set PAPer colour
+iow_sstr equ $28                  ; Set STRip colour
+iow_sink equ $29                  ; Set INK colour
+iow_sfla equ $2a                  ; Set FLash Attribute
+iow_sula equ $2b                  ; Set UnderLine Attribute
+iow_sova equ $2c                  ; Set OVerwrite Attributes
+iow_ssiz equ $2d                  ; Set character SIZe
+iow_blok equ $2e                  ; fill a BLOcK with colour
+iow_donl equ $2f                  ; DO a pending newline
+
+iog_dot  equ $30                  ; draw (list of) DOTs
+iog_line equ $31                  ; draw (list of) LINEs
+iog_arc  equ $32                  ; draw (list of) ARCs
+iog_elip equ $33                  ; draw ELlIPse
+iog_scal equ $34                  ; set graphics SCALe
+iog_fill equ $35                  ; set area FILL
+iog_sgcr equ $36                  ; Set Graphics CuRsor position
+
+iof_chek equ $40                 ;   CHEcK all pending operations on file
+iof_flsh equ $41                 ;   FLuSH all buffers
+iof_posa equ $42                 ;   set file POSition to Absolute address
+iofp_off equ $F0FFF0FF           ;   key in d1 returns sector 0 offset (direct sector access)
+iof_posr equ $43                 ;   move file POSition Relative to current position
+iof_minf equ $45                 ;   get Medium INFormation
+iof_shdr equ $46                 ;   Set file HeaDeR
+iof_rhdr equ $47                 ;   Read file HeaDeR
+iof_load equ $48                 ;   (scatter) LOAD file
+iof_save equ $49                 ;   (scatter) SAVE file
+iof_rnam equ $4a                 ;   ReNAMe file [EXT]
+iof_trnc equ $4b                 ;   TRuNCate file to current position [EXT]
+iof_date equ $4c                 ;   set or get file DATEs [EXT,DD2]
+iofd_get equ -1                  ;     d1 key, GET date (or version)
+iofd_cur equ 0                   ;     d1 key, set CURrent date (or version)
+iofd_upd equ 0                   ;     d2 key, set/get UPDate date
+iofd_bak equ 2                   ;     d2 key, set/get BAcKup date
+iof_mkdr equ $4d                 ;   MaKe DiRectory [DD2]
+iof_vers equ $4e                 ;   set or get VERSion (d1 keys as iof.date) [DD2]
+iof_xinf equ $4f                 ;   get eXtended INFormation [DD2]
+
+; All keys higher than $4f are for pointer-driven CON devices.
+; Please refer to the QPTR manual.
 
 ; ----------------------------------------------
 ; Screen output calls (trap #3)
@@ -167,8 +327,8 @@ fs_save       equ   $00000049
 ; ----------------------------------------------
 ; Supervisor mode routines
 
-mm_alchp      equ   $000000c0
-mm_rechp      equ   $000000c2
+mm_alchp      equ   $000000c0 ; common heap area
+mm_rechp      equ   $000000c2 ; common heap area, also released when owner job is deleted
 
 io_serq       equ   $000000e8
 io_serio      equ   $000000ea
@@ -189,8 +349,8 @@ ut_mtext      equ   $000000d0
 
 ut_link       equ   $000000d2
 ut_unlnk      equ   $000000d4
-mm_alloc      equ   $000000d8
-mm_lnkfr      equ   $000000da
+mm_alloc      equ   $000000d8 ; heap allocation within the jobs own data area
+mm_lnkfr      equ   $000000da ; heap allocation within the jobs own data area
 io_qset       equ   $000000dc
 io_qtest      equ   $000000de
 io_qin        equ   $000000e0
@@ -225,7 +385,7 @@ ca_gtint      equ   $00000112
 ca_gtfp       equ   $00000114
 ca_gtstr      equ   $00000116
 ca_gtlin      equ   $00000118
-bv_chrix      equ   $0000011a
+bv_chrix      equ   $0000011a ; SuperBASIC area, space in RI stack
 ri_exec       equ   $0000011c
 ri_execb      equ   $0000011e
 bp_let        equ   $00000120
@@ -322,7 +482,8 @@ sv_aclos      equ   $00000024
 ; ----------------------------------------------
 ; Machine identification
 
-sys_idnt equ  $0000  ; long  system variables identifier
+sys_idnt equ  $0000      ; long  system variables identifier
+
 sysid_ql equ  $d2540000  ; QL (QDOS) system variable identifier
 sysid_at equ  'S2AT'     ; SMS Atari system variable identifier
 sysid_sq equ  'SMSQ'     ; SMSQ identifier
@@ -627,10 +788,177 @@ sd_end        equ   $00000068
 ut_chan1 equ 1
 
 ; ==============================================================
-; XXX TMP -- from labels_qdos_io_asm
+; SMS2 IOSS operations
 
-; Pointer I/O trap keys
-iop_slnk equ  $6f   ; Set bytes in LINKage block
+do_io   equ  3     ; trap #3
+do_relio equ  4     ; trap #4
+
+; character/byte IO operations
+
+iob_test equ  $00   ; TEST input
+iob_fbyt equ  $01   ; Fetch BYTe from input
+iob_flin equ  $02   ; Fetch LINe from input
+iob_fmul equ  $03   ; Fetch MULtiple characters/bytes
+iob_elin equ  $04   ; Edit LINe of characters
+iob_sbyt equ  $05   ; Send BYTe to output
+iob_suml equ  $06   ; Send Untranslated MuLtiple bytes
+iob_smul equ  $07   ; Send MULtiple bytes
+
+; window IO operations
+
+iow_xtop equ  $09   ; eXTernal OPeration on screen
+iow_pixq equ  $0a   ; PIXel coordinate Query
+iow_chrq equ  $0b   ; CHaRacter coordinate Query
+iow_defb equ  $0c   ; DEFine Border
+iow_defw equ  $0d   ; DEFine Window
+iow_ecur equ  $0e   ; Enable CURsor
+iow_dcur equ  $0f   ; Disable CURsor
+iow_scur equ  $10   ; Set CURsor position (character coordinates)
+iow_scol equ  $11   ; Set cursor COLumn
+iow_newl equ  $12   ; put cursor on a NEW Line
+iow_pcol equ  $13   ; move cursor to Previous COLumn
+iow_ncol equ  $14   ; move cursor to Next COLumn
+iow_prow equ  $15   ; move cursor to Prevous ROW
+iow_nrow equ  $16   ; move cursor to Next ROW
+iow_spix equ  $17   ; Set cursor to PIXel position
+iow_scra equ  $18   ; SCRoll All of window
+iow_scrt equ  $19   ; SCRoll Top of window (above cursor)
+iow_scrb equ  $1a   ; SCRoll Bottom of window (below cursor)
+iow_pana equ  $1b   ; PAN All of window
+
+iow_panl equ  $1e   ; PAN cursor Line
+iow_panr equ  $1f   ; PAN Right hand end of cursor line
+iow_clra equ  $20   ; CLeaR All of window
+iow_clrt equ  $21   ; CLeaR Top of window (above cursor)
+iow_clrb equ  $22   ; CLeaR Bottom of window (below cursor)
+iow_clrl equ  $23   ; CLeaR cursor Line
+iow_clrr equ  $24   ; CLeaR Right hand side of cursor line
+iow_font equ  $25   ; set / read FOuNT (font U_S_A_)
+iow_rclr equ  $26   ; ReCoLouR a window
+iow_spap equ  $27   ; Set PAPer colour
+iow_sstr equ  $28   ; Set STRip colour
+iow_sink equ  $29   ; Set INK colour
+iow_sfla equ  $2a   ; Set FLash Attribute
+iow_sula equ  $2b   ; Set UnderLine Attribute
+iow_sova equ  $2c   ; Set OVerwrite Attributes
+iow_ssiz equ  $2d   ; Set character SIZe
+iow_blok equ  $2e   ; fill a BLOcK with colour
+
+iow_donl equ  $2f   ; DO a pending newline
+
+; graphics operations
+
+iog_dot  equ  $30   ; draw (list of) DOTs
+iog_line equ  $31   ; draw (list of) LINEs
+iog_arc  equ  $32   ; draw (list of) ARCs
+iog_elip equ  $33   ; draw ELlIPse
+iog_scal equ  $34   ; set graphics SCALe
+iog_fill equ  $35   ; set area FILL
+iog_sgcr equ  $36   ; Set Graphics CuRsor position
+
+
+; filing system
+
+iof_chek equ  $40   ; CHEcK all pending operations on file
+iof_flsh equ  $41   ; FLuSH all buffers
+iof_posa equ  $42   ; set file POSition to Absolute address
+iofp_off equ    $F0FFF0FF ; key in d1, returns sector 0 offset (direct sect)
+iofp_def equ    $F0FFF100 ; key in d1, returns -1 in d1 if next read is IDE
+          ;     drive definition sector (real or fake)
+iof_posr equ  $43   ; move file POSition Relative to current position
+iof_posv equ  $44   ; set file POSition to Virtual address
+iof_minf equ  $45   ; get Medium INFormation
+iof_shdr equ  $46   ; Set file HeaDeR
+iof_rhdr equ  $47   ; Read file HeaDeR
+iof_load equ  $48   ; (scatter) LOAD file
+iof_save equ  $49   ; (scatter) SAVE file
+iof_rnam equ  $4a   ; ReNAMe file
+iof_trnc equ  $4b   ; TRuNCate file to current position
+iof_date equ  $4c   ; set or get file DATEs
+iofd_get equ    -1  ; d1 key, GET date (or version)
+iofd_cur equ    0  ; d1 key, set CURrent date (or version)
+iofd_upd equ    0  ; d2 key, set/get UPDate date
+iofd_bak equ    2  ; d2 key, set/get BAcKup date
+iof_mkdr equ  $4d   ; MaKe DiRectory
+iof_vers equ  $4e   ; set or get VERSion (d1 keys as iof_date)
+iof_xinf equ  $4f   ; get eXtended INFormation
+ioi_name equ    $00  ; string  up to 20 character medium name (null filled)
+ioi_dnam equ    $16  ; string  up to 4 character long device name (e_g_ WIN)
+ioi_dnum equ    $1c  ; byte    drive number
+ioi_rdon equ    $1d  ; byte    set if read only
+ioi_allc equ    $1e  ; word    allocation unit size (in bytes)
+ioi_totl equ    $20  ; long    total medium size (in allocation units)
+ioi_free equ    $24  ; long    free space on medium (in allocation units)
+ioi_hdrl equ    $28  ; long    header length (per file storage overhead)
+ioi_ftyp equ    $2c  ; byte    format type (1=QDOS, 2=MSDOS etc)
+ioi_styp equ    $2d  ; byte    format sub-type
+ioi_dens equ    $2e  ; byte    density
+ioi_mtyp equ    $2f  ; byte    medium type (RAM=0, FLP=1, HD=2, CD=3)
+ioi_remv equ    $30  ; byte    set if removable
+ioi_xxx1 equ    $31  ; $0f    bytes set to -1
+ioi_blkl equ    $40  ; information block length
+
+;  Extended colour traps
+
+iow_papp equ  $50   ; define paper colour (palette)
+iow_strp equ  $51   ; define strip colour (palette)
+iow_inkp equ  $52   ; define ink colour (palette)
+iow_borp equ  $53   ; define border (palette)
+
+iow_papt equ  $54   ; define paper colour (24 bit)
+iow_strt equ  $55   ; define strip colour (24 bit)
+iow_inkt equ  $56   ; define ink colour (24 bit)
+iow_bort equ  $57   ; define border (24 bit)
+
+iow_papn equ  $58   ; define paper colour (native)
+iow_strn equ  $59   ; define strip colour (native)
+iow_inkn equ  $5a   ; define ink colour (native)
+iow_born equ  $5b   ; define border (native)
+
+iow_blkp equ  $5c   ; draw block (palette)
+iow_blkt equ  $5d   ; draw block (24 bit)
+iow_blkn equ  $5e   ; draw block (native)
+
+iow_palq equ  $60   ; define QL colour palette
+iow_palt equ  $61   ; define 8 bit palette
+
+;  Pointer I/O trap keys
+
+iop_wpap equ  $6b   ; define wallpaper
+iop_flim equ  $6c   ; Find window LIMits
+iop_svpw equ  $6d   ; SaVe Part of Window
+iop_rspw equ  $6e   ; ReStore Part of Window
+iop_slnk equ  $6f   ; Set bytes in LiNKage block
+iop_pinf equ  $70   ; pointer information
+iop_rptr equ  $71   ; read pointer
+iop_rpxl equ  $72   ; read pixel
+iop__gcl equ    16  ;   use given colour
+iop__sdr equ    17  ;   scan down right
+iop__slr equ    18  ;   scan left right
+iop__ssc equ    19  ;   scan same colour
+iop__scn equ    31  ;   scan
+iop_wblb equ  $73   ; write blob
+iop_lblb equ  $74   ; write line of blobs
+
+iop_wspt equ  $76   ; write sprite
+iop_spry equ  $77   ; spray pixels
+iop_film equ  $78   ; fill within mask
+iop_splm equ  $79   ; set pointer limits
+iop_outl equ  $7a   ; set window outline
+iopo_set equ    0   ;   just set
+iopo_mov equ    1   ;   move contents and set outline
+iop_sptr equ  $7b   ; set pointer position
+iops_rew equ    -1  ;   pointer position relative to window
+iops_abs equ    0   ;   pointer position absolute
+iops_reh equ    1   ;   pointer position relative to hit area
+iop_pick equ  $7c   ; pick / bury window
+iopp_bot equ    -1  ;   pick bottom
+iopp_nlk equ    -2  ;   set no lock
+iopp_frz equ    -3  ;   set freeze
+
+iop_swdf equ  $7d   ; set window definition
+iop_wsav equ  $7e   ; locate and save window
+iop_wrst equ  $7f   ; restore window
 
 ; timeout keys
 no_wait  equ  0
@@ -641,24 +969,105 @@ forever  equ  -1
 
 ; Format of pointer device driver definition block
 
-pt_scren equ  $e8    ; ; long  address of visible SCREeN
-pt_scrsz equ  $ec    ; ; long  SCReen SiZe in bytes
-pt_scinc equ  $f0    ; ; word  SCreen row INCrement
-pt_xscrs equ  $f2    ; ; word  X SCReen Size in pixels
-pt_yscrs equ  $f4    ; ; word  Y SCReen Size in pixels
+pt_scren equ  $e8    ; long  address of visible SCREeN
+pt_scrsz equ  $ec    ; long  SCReen SiZe in bytes
+pt_scinc equ  $f0    ; word  SCreen row INCrement
+pt_xscrs equ  $f2    ; word  X SCReen Size in pixels
+pt_yscrs equ  $f4    ; word  Y SCReen Size in pixels
 
-pt_xtotl equ  $f6    ; ; word  X total pixels
-pt_xvref equ  $f8    ; ; word  X visible reference for xtotl
-pt_ytotl equ  $fa    ; ; word  Y total pixels
-pt_yvref equ  $fc    ; ; word  Y visible reference for ytotl
-pt_frate equ  $fe    ; ; word  frame rate
+pt_xtotl equ  $f6    ; word  X total pixels
+pt_xvref equ  $f8    ; word  X visible reference for xtotl
+pt_ytotl equ  $fa    ; word  Y total pixels
+pt_yvref equ  $fc    ; word  Y visible reference for ytotl
+pt_frate equ  $fe    ; word  frame rate
 
-pt_bgstp equ  $102   ; ; word  background stipple
-pt_bgclm equ  $104   ; ; long  background colour mask
-pt_sfnt1 equ  $108   ; ; long  pointer to Standard FoNT 1
-pt_sfnt2 equ  $10c   ; ; long  pointer to Standard FoNT 2
+pt_bgstp equ  $102   ; word  background stipple
+pt_bgclm equ  $104   ; long  background colour mask
+pt_sfnt1 equ  $108   ; long  pointer to Standard FoNT 1
+pt_sfnt2 equ  $10c   ; long  pointer to Standard FoNT 2
 
 ; Channel definition block
 
 sd_linel equ  $64  ; word   line length in bytes
 
+; ==============================================================
+; Errors
+
+; QDOS
+
+err_nc equ  -1  ;  operation not complete
+err_nj equ  -2  ;  not a (valid) job
+err_om equ  -3  ;  out of memory
+err_or equ  -4  ;  out of range
+err_bo equ  -5  ;  buffer overflow
+err_no equ  -6  ;  channel not open
+err_nf equ  -7  ;  file or device not found
+err_ex equ  -8  ;  file already exists
+err_iu equ  -9  ;  file or device already in use
+err_ef equ  -10 ;  end of file
+err_df equ  -11 ;  drive full
+err_bn equ  -12 ;  bad device
+err_te equ  -13 ;  transmission error
+err_ff equ  -14 ;  format failed
+err_bp equ  -15 ;  bad parameter
+err_fe equ  -16 ;  file error
+err_xp equ  -17 ;  expression error
+err_ov equ  -18 ;  arithmetic overflow
+err_ni equ  -19 ;  not implemented (yet)
+err_ro equ  -20 ;  read only
+err_bl equ  -21 ;  bad line of basic
+err_at equ  -22 ;  at line message
+err_sc equ  -23 ;  sectors message
+err_bt equ  -24 ;  boot message
+err_cp equ  -25 ;  copyright message
+err_pf equ  -26 ;  proc/fn message
+
+; SMSQ
+
+err_nc   equ    -1  ; operation Not Complete
+err_ijob equ    -2  ; Invalid JOB id
+err_imem equ    -3  ; Insufficient MEMory
+err_orng equ    -4  ; parameter Outside permitted RaNGe (c.f. err.ipar
+err_bffl equ    -5  ; BuFfer FuLl
+err_ichn equ    -6  ; Invalid CHaNnel id
+err_fdnf equ    -7  ; File or Device Not Found
+err_itnf equ    -7  ; ITem Not Found
+err_fex  equ    -8  ; File already EXists
+err_fdiu equ    -9  ; File or Device or In Use
+err_eof  equ    -10  ; End Of File
+err_drfl equ    -11  ; DRive FuLl
+err_inam equ    -12  ; Invalid file, device or thing name
+err_trns equ    -13  ; TRaNSmission error
+err_prty equ    -13  ; PaRiTY error
+err_fmtf equ    -14  ; ForMaT drive Failed
+err_ipar equ    -15  ; Invalid PARameter (c.f. err.orng)
+err_mchk equ    -16  ; file system Medium CHecK failed
+err_iexp equ    -17  ; Invalid EXPression
+err_ovfl equ    -18  ; arithmetic OVerFLow
+err_nimp equ    -19  ; operation Not IMPlemented
+err_rdo  equ    -20  ; ReaD Only permitted
+err_isyn equ    -21  ; Invalid SYNtax
+err_noms equ    -22  ; No error message
+err_accd equ    -23  ; Access denied
+
+; ==============================================================
+; Common heap header
+
+chp_len   equ    $0000    ; long    LENgth of space in common heap, including header
+chp_drlk  equ    $0004    ; long    pointer to DRiver LinKage (allocated space)
+chp_nxfr  equ    $0004    ; long    rel pointer (-4) to NeXt FRee space (free_space)
+chp_ownr  equ    $0008    ; long    OWNer job id (-1 if not owned)
+chp_flag  equ    $000c    ; long    address of FLAG byte, set when space released
+chp_end   equ    $0010
+chp__len  equ    $0010
+
+chp_free equ    -1       ;         FREE space owner
+
+chp_orel equ    $000c    ; long    Offset of pointer to RELease code from chp_drlk
+
+; ==============================================================
+
+; vim: filetype=asm68k
+  
+  list on
+  end

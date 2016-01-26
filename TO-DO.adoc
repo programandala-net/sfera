@@ -1,16 +1,20 @@
 = Sfera TO-DO
-:revdate: 2016-01-15
+:revdate: 2016-01-26
 
 // This file is part of Sfera, a library for SuperForth
 // http://programandala.net/en.program.sfera.html
 
 // You may do whatever you want with this work, so long as you
-// retain all the copyright/authorship/acknowledgment/credit
+// retain the copyright/authorship/acknowledgment/credit
 // notice(s) and this license in all redistributed copies and
 // derived works.  There is no warranty.
 
 // This file is written in AsciiDoc/Asciidoctor format
 // (http://asciidoctor.org)
+
+Note: There are more issues noted in the sources (search them for
+"XXX" marks).  Besides, some Forth and assembly source files are not
+finished yet (they include a note).
 
 2016-01-03:
 
@@ -87,3 +91,32 @@ unique name (time string and job id).
 Write a tool to rename all original words, replacing "_" with "-".
 Since standard Forth words does not use underscores, it seems
 desirable to homogenize the whole dictionary. 
+
+2016-01-17:
+
+Change the job name in `turnkey`.
+
+Some words are defined in the <boot_fs> file, but also in their own
+files, because it's not yet decided wether they will be part of the
+library core or optional.
+
+`nip` is defined in machine code in the core, but it also has a
+<nip_fs> file which loads the assembled binary. This is just an idea
+for a future version: create a _fs file for every _bin file. This way
+the programmer does not need to know wether a word or module is
+written in Forth or in assembly.
+
+No documentation yet.
+
+2016-01-22:
+
+Fix `adump`.
+
+2016-01-23:
+
+Write `aresize`.
+
+2016-01-26:
+
+Finish `win-line-len` and `win-base`.
+Finish the conversion of `bmp8load`.

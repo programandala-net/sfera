@@ -5,15 +5,13 @@
 
 \ Author: Marcos Cruz (programandala.net)
 
-\ XXX UNDER DEVELOPMENT
-
-\ Last update: 2016-01-08 19:03 +0100
+\ XXX UNDER DEVELOPMENT -- usable, but needs improvements
 
 \ ==============================================================
 \ License
 
 \ You may do whatever you want with this work, so long as you
-\ retain all the copyright/authorship/acknowledgment/credit
+\ retain the copyright/authorship/acknowledgment/credit
 \ notice(s) and this license in all redistributed copies and
 \ derived works.  There is no warranty.
 
@@ -21,6 +19,8 @@
 \ History
 
 \ 2016-01-08: Start.
+\ 2016-01-23: Updated header.
+
 
 \ ==============================================================
 

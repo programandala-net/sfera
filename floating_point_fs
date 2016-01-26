@@ -11,7 +11,7 @@
 \ License
 
 \ You may do whatever you want with this work, so long as you
-\ retain all the copyright/authorship/acknowledgment/credit
+\ retain the copyright/authorship/acknowledgment/credit
 \ notice(s) and this license in all redistributed copies and
 \ derived works.  There is no warranty.
 
@@ -25,7 +25,7 @@
 
 \ ==============================================================
 
-require code_fs
+require dev4_code_fs
 
 code c_fp  ( ad n1 --- n2 )
   3002 , 4287 , 2f09 , 2f0c , 385b ,

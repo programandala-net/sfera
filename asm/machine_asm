@@ -1,0 +1,79 @@
+; machine_asm
+
+; This file is part of Sfera, a library for SuperForth
+; http://programandala.net/en.program.sfera.html
+
+; Author: Marcos Cruz (programandala.net), 2016.
+
+; ==============================================================
+; License
+
+; You may do whatever you want with this work, so long as you
+; retain the copyright/authorship/acknowledgment/credit
+; notice(s) and this license in all redistributed copies and
+; derived works.  There is no warranty.
+
+; ==============================================================
+; Credit
+
+; Based on code from Display Extensions V2.01 (last update
+; 2003-02-21), written by Dilwyn Jones, <http://dilwyn.me.uk>.
+;
+; The information was retrieved from:
+;
+; A S*BASIC program called what_hw_bas, version 1.2 (1997-11-28)
+; written by J.D.Mitchell (JackAThome9999DOTdemonDOTcoDOTuk).a
+;
+; "Which machine am I running on?", written by Dilwyn Jones and
+; Marcel Kilgus.
+
+; ==============================================================
+; Description
+
+; `machine` returns the identifier of the machine:
+;
+; 0     = Standard QL
+; 1     = Atari ST
+; 2,3   = Mega ST or ST with RTC
+; 4,5   = Stacy
+; 6,7   = STE
+; 8,9   = Mega STE
+; 10,11 = GOLD card
+; 12,13 = Super Gold card
+; 16    = Falcon
+; 17    = Q40
+; 20    = SMSQmulator
+; 24    = TT 030
+; 28    = QXL
+; 30    = QPC
+; 31    = QLAY
+
+; ==============================================================
+; History
+
+; 2016-01-17: Written.
+
+; ==============================================================
+
+  include 'inc_macros_asm'
+  include 'inc_labels_asm'
+
+  code 'MACHINE',machine_end  ; ( -- n )
+
+  move.l  a0,-(sp)         ; save SuperForth's a0
+  moveq.l #mt_inf,d0
+  trap    #1               ; call mt.inf
+  ; a0 = addresss of system variables
+  move.b  sys_mtyp(a0),d0
+  and.w   #31,d0
+  push_w  d0               ; to the Forth stack
+  move.l  (sp)+,a0         ; restore SuperForth's a0
+  next
+
+machine_end equ *
+
+  end_code_definitions
+
+  end
+
+

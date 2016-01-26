@@ -1,0 +1,78 @@
+= Sfera versions history
+:author: Marcos Cruz (programandala.net)
+:revdate: 2016-01-26
+
+// This file is part of Sfera, a library for SuperForth
+// http://programandala.net/en.program.sfera.html
+
+// You may do whatever you want with this work, so long as you
+// retain the copyright/authorship/acknowledgment/credit
+// notice(s) and this license in all redistributed copies and
+// derived works.  There is no warranty.
+
+// This file is written in AsciiDoc/Asciidoctor format
+// (http://asciidoctor.org)
+
+Note: Version numbering after http://semver.org/[Semantic
+Versioning].
+
+== 0.0.0
+
+Initial development, from 2015-12-31 to 2016-01-14.
+Started from a simple boot file.
+
+== 0.1.0+20160115
+
+First usable version.
+
+The main words are defined in the <boot_fs> file. Optional words are
+in Forth or binary files.
+
+=== Main features
+
+- `code`, `end-code`, `next,` and other basic words to facilitate
+  creating machine code definitions.
+- Set of standard address arithmetic words.
+- Set of header addresses words.
+- New operators and stack words.
+- Nestable `include`, `included`; non-nestable versions `include-code`
+  and `included-code` for assembled binary files.
+- Nestable `require`, `required`; non-nestable versions `require-code`
+  and `required-code` for assembled binary files.
+- Tool modules: `dump`, `wdump`, `adump`, `decode` (some fixes
+  pending).
+- Floating point module updated with standard names, and some comus
+  addons.
+- New parsing and compiling words, like `postpone`.
+- Basic initial support for standard strings.
+- Numeric prefixes: `c#`, `h#`, `d#`, `b#`.
+- Fixed two name clashes: `char` is renamed to `chr@` and `unused`
+  is renamed to `spared`. Standard `char` and `unused` are provided.
+- New string operators which work with ordinary counted strings
+  (the SuperForth string operators work only with its own format,
+  which include the maximum length).
+- Conditional compilation.
+- Standard `endcase`.
+- Words to facilitate reading the keyboard.
+- Words to facilitate managing the windows: `set-window`, `window`,
+  `set-main-window`...
+- `boot` reboots the Forth system.
+- Standard `value` (single-cell values only).
+- System information words: `screen-size`, `get-mode`, `sys-vars`,
+  `current-job-id`.
+
+== 0.1.1+20160115
+
+- Fix: Removed a missing old file loaded from <boot_fs>.
+- Change: Updated some file headers.
+
+== 0.2.0+20160126
+
+- New: more system information words: `machine` , `processor`,
+  `display-type`.
+- New: words to allocate memory from the OS common heap: `aallocate`,
+  `afree`, `aunused`.
+- Change: `screen-size` is renamed to `display-size`.
+- New: standard deferred words: `defer`, `defer!`, `defer@`, `defers`,
+  `action-of`, `is`.
+- Removed `win-base-len`, which still is a draft.

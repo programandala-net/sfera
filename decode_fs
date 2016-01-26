@@ -5,15 +5,14 @@
 
 \ Author: Marcos Cruz (programandala.net), 2015, 2016.
 
-\ XXX UNDER DEVELOPMENT
-
-\ Last update: 20160112
+\ XXX UNDER DEVELOPMENT -- usable, but a lot of headerless words
+\ are not recognized yet, and sometimes it fails
 
 \ ==============================================================
 \ License
 
 \ You may do whatever you want with this work, so long as you
-\ retain all the copyright/authorship/acknowledgment/credit
+\ retain the copyright/authorship/acknowledgment/credit
 \ notice(s) and this license in all redistributed copies and
 \ derived works.  There is no warranty.
 
@@ -22,7 +21,7 @@
 
 \ This module provides decoding words.
 
-\ This code started with code previous versions written for Solo
+\ It started with code from previous versions written for Solo
 \ Forth (http://programandala.net/en.program.solo_forth.html)
 \ and Afera (http://programandala.net/en.program.afera.html).
 
@@ -383,5 +382,7 @@ end-of-file
 \ warning is shown instead, they don't cause trouble anymore.
 \
 \ 2016-01-12: Updated: `link>link?` instead of `first-word? 0=`.
+\
+\ 2016-01-23: Comments.
 
 \ vim: filetype=superforthsfera

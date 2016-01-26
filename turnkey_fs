@@ -6,13 +6,13 @@
 \ Author: Gerry Jackson, 1985.
 \ Modified by Marcos Cruz (programandala.net), 2016.
 
-\ XXX UNDER DEVELOPMENT
+\ XXX UNDER DEVELOPMENT -- not usable yet
 
 \ ==============================================================
 \ License
 
 \ You may do whatever you want with this work, so long as you
-\ retain all the copyright/authorship/acknowledgment/credit
+\ retain the copyright/authorship/acknowledgment/credit
 \ notice(s) and this license in all redistributed copies and
 \ derived works.  There is no warranty.
 
@@ -24,6 +24,8 @@
 \ comments. Fixed `map`.
 \
 \ 2016-01-15: First tries. Some notes.
+\
+\ 2016-01-23: Check. Note.
 
 \ ==============================================================
 
@@ -47,6 +49,7 @@
   ." Return to SuperBASIC with CTRL C, then type:" cr cr
   ." sexec <filename>," 32776 2@ 4096. d- d.
   ." ," here 32768 - 4096 + u. ." ," u. cr cr  ;
+  \ XXX TODO save the file here, not in SuperBASIC
 
 : save-application  ( "name" -- )
   map ' turnkey dename

@@ -3,19 +3,17 @@
 ; This file is part of Sfera, a library for SuperForth
 ; http://programandala.net/en.program.sfera.html
 
-; XXX UNDER DEVELOPMENT
+; XXX UNDER DEVELOPMENT -- not usable yet
 
 ; Author: Unknown.
 ; Origin: Public Domain Font Initialisation Routine
 ; Adapted by: Marcos Cruz (programandala.net), 2016
 
-; Last update: 201601150153
-
 ; ==============================================================
 ; License
 
 ; You may do whatever you want with this work, so long as you
-; retain all the copyright/authorship/acknowledgment/credit
+; retain the copyright/authorship/acknowledgment/credit
 ; notice(s) and this license in all redistributed copies and
 ; derived works.  There is no warranty.
 
@@ -43,9 +41,7 @@
 
   ; XXX FIXME -- the Forth system freezes
 
-  move.l    a0,-(sp)            ; save SuperForth a0
-  move.l    a1,-(sp)            ; save SuperForth a1
-  move.l    a2,-(sp)            ; save SuperForth a2
+  movem.l   a0-a2,-(sp)         ; save SuperForth registers
 
   pop_l     d3
   move.l    d3,a0               ; a0 = channel id
@@ -59,9 +55,7 @@
 
   push_w    d0                  ; error code
 
-  move.l    (sp)+,a2            ; restore SuperForth a2
-  move.l    (sp)+,a1            ; restore SuperForth a1
-  move.l    (sp)+,a0            ; restore SuperForth a0
+  movem.l   (sp)+,a0-a2         ; restore SuperForth registers
 
   next
 

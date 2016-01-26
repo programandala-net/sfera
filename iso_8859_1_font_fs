@@ -6,21 +6,18 @@
 \ Copyright (C) 1996 H.-Peter Recktenwald, 1996
 \ Adapted by: Marcos Cruz (programandala.net), 2016
 
-\ Last update: 201601111557
-
 \ ==============================================================
 \ License
 
 \ You may do whatever you want with this work, so long as you
-\ retain all the copyright/authorship/acknowledgment/credit
+\ retain the copyright/authorship/acknowledgment/credit
 \ notice(s) and this license in all redistributed copies and
 \ derived works.  There is no warranty.
 
 \ ==============================================================
 \ History
 
-\ 2016-01-11: Added to the library. Adapted from the original
-\ SuperBasic data format.
+\ 2016-01-11: Adapted from the original SuperBasic data format.
 
 \ ==============================================================
 \ Credit

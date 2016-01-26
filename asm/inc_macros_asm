@@ -1,9 +1,13 @@
+  list off
+  list nosym
+  list notemp
+
 ; inc_macros_asm
 
 ; This file is part of Sfera, a library for SuperForth
 ; http://programandala.net/en.program.sfera.html
 
-; Author: Marcos Cruz (programandala.net), 2015.
+; Author: Marcos Cruz (programandala.net), 2016.
 ;
 ; Code based on information from the SuperForth manual, by Gerry
 ; Jackson, 1985.
@@ -12,7 +16,7 @@
 ; License
 
 ; You may do whatever you want with this work, so long as you
-; retain all the copyright/authorship/acknowledgment/credit
+; retain the copyright/authorship/acknowledgment/credit
 ; notice(s) and this license in all redistributed copies and
 ; derived works.  There is no warranty.
 
@@ -68,6 +72,11 @@
 ; else only one word can be defined in the same file.
 ;
 ; 2016-01-14: Finished `pop_l`.
+;
+; 2016-01-24: Directives to turn off listings.
+;
+; 2016-01-26: Renamed the parameter of `pop_l`, because it must
+; be a data register.
 
 ; ==============================================================
 
@@ -124,29 +133,32 @@ pop_w macro register
 
 push_l macro register
 
-  ; Push _register_ on the Forth data stack as a 2-cell number.
+  ; Push _register_ on the Forth data stack as a 2-cell
+  ; number.
 
-  move.w d2,-(a3)         ; TOS -> NOS
-  move.w register,-(a3)   ; low part of register -> NOS
+  move.w d2,-(a3)            ; TOS -> NOS
+  move.w register,-(a3) ; low part of register -> NOS
   move.l register,d2
-  swap d2                 ; high part of register -> TOS
+  swap d2                    ; high part of register -> TOS
 
   endm
 
-pop_l macro register
+pop_l macro data_register
 
   ; Pop 2-cell number from the Forth data stack and move it to
-  ; _register_.
+  ; _data_register_.
 
-  move.w    d2,register   ; high cell to low half of register
-  swap      register      ; high cell to high half of register
-  move.w    (a3)+,d2      ; low cell to low half of d2
+  move.w    d2,data_register ; high cell to low half of register
+  swap      data_register    ; high cell to high half of register
+  move.w    (a3)+,d2         ; low cell to low half of d2
   swap      d2
-  clr.w     d2            ; clear high half of d2
+  clr.w     d2               ; clear high half of d2
   swap      d2
-  or.l      d2,register   ; combine
-  move.w    (a3)+,d2      ; new TOS
+  or.l      d2,data_register ; combine
+  move.w    (a3)+,d2         ; new TOS
 
   endm
+
+  list on
 
   end

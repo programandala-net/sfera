@@ -1,18 +1,15 @@
 ( boot_fs )
 
 ( This file is part of Sfera, a library for SuperForth )
-( Version: 0.1.1+20160115 )
 ( http://programandala.net/en.program.sfera.html )
 
 ( Author: Marcos Cruz [programandala.net] )
-
-( Last update: 201601151727 )
 
 ( ============================================================ )
 ( License )
 
 ( You may do whatever you want with this work, so long as you )
-( retain all the copyright/authorship/acknowledgment/credit )
+( retain the copyright/authorship/acknowledgment/credit )
 ( notice[s] and this license in all redistributed copies and )
 ( derived works.  There is no warranty. )
 
@@ -40,7 +37,9 @@ LOWER  ( case-insensitive mode )
 
 forth definitions
 
-: sfera  ( -- )  ; immediate
+: sfera  ( -- ca )  read" 0.2.0+20160126"  ;
+
+: .sfera  ( -- )  ." Sfera v" sfera count type  ;
 
 : noop  ( -- )  ;
 
@@ -48,10 +47,11 @@ forth definitions
   10 word drop  ;  immediate
   \ Ignore the rest of the input stream line.
 
-\ In SuperForth, a vocabulary is chained to the vocabulary it
-\ was created in, so this fake definitions are compatible with
-\ the real ones:
+\ SuperForth lacks vocabulary search order, and vocabularies are
+\ chained to the vocabulary they were created in, so these fake
+\ temporary definitions are compatible with the real ones:
 
+\ XXX TMP
 : only  ( -- )  forth  ;
 : also  ( -- )  ; immediate
 
@@ -66,6 +66,8 @@ forth definitions
 
 : 0<>  ( x -- f )  0 <>  ;
   \ XXX TODO in assembly
+
+: 2,  ( x1 x2 -- )  , ,  ;
 
 \ ============================================================ ;
 \ : Address artithmetic
@@ -249,6 +251,7 @@ code tuck  ( x1 x2 -- x2 x1 x2 )
   3700 ,  \ move.w d0,-(a3)  ; push x1
   next,
   end-code
+  \ XXX TODO move to its own file
 
 code rdrop  ( R: x -- )
   D9FC , 0000 , 0002 , \ adda.l #2,a4
@@ -259,16 +262,19 @@ code 2rdrop  ( R: x1 x2 -- )
   D9FC , 0000 , 0004 , \ adda.l #4,a4
   next,
   end-code
+  \ XXX TODO move to its own file
 
 : bounds  ( ca len -- ca2 ca )  over + swap  ;
 
 : 2>r  ( x1 x2 -- ) ( R: -- x1 x2 )
   r> r> 2swap swap >r >r >r >r  ;
   \ XXX TODO in assembly
+  \ XXX TODO move to its own file
 
 : 2r>  ( -- x1 x2 ) ( R: x1 x2 -- )
   r> r> r> r> swap 2swap >r >r  ;
   \ XXX TODO in assembly
+  \ XXX TODO move to its own file
 
 \ ============================================================ ;
 \ : Text output
@@ -618,8 +624,13 @@ variable base'
   cr .s key drop  ;
 
 [defined] unused [if]
+ 
+  \ .( `unused` exists) cr real-key drop \ XXX INFORMER
+
   ' unused ' forth-83 u<  [if]  \ original `unused`?
 
+  \ .( `unused` is the original one) cr real-key drop \ XXX INFORMER
+  
     ' unused >name
     c# S over 1 + c!
     c# P over 2 + c!
@@ -662,7 +673,7 @@ exvec: default-colors  ( -- )
 
 assign default-colors to-do (default-colors)
 
-default-colors cls
+default-colors 
 
 : set-window  ( d -- )
   2dup #in 2! #out 2!  ;
@@ -690,16 +701,18 @@ default-colors cls
   \ Create a word called "name" that, when executed,
   \ will set channel _d_ as the main window.
 
+\ XXX TMP
+0 open con_512x256a0x0  2constant #512x256
 0 open con_800x600a0x0  2constant #800x600
+0 open con_1024x768a0x0 2constant #1024x768
 0 open con_1280x800a0x0 2constant #1280x800
-
+: w512  ( -- )  #512x256 set-main-window  ;
 : w800  ( -- )  #800x600 set-main-window  ;
+: w1024 ( -- )  #1024x768 set-main-window  ;
 : w1280 ( -- )  #1280x800 set-main-window  ;
-
 cr
-.( Words to change the main window:)  cr
-.(   w800  = 800x600)  cr
-.(   w1280 = 1280x800)  cr
+.( Words to change the size of the main window:)  cr
+.( w512 w800 w1024 w1280) cr
 
 \ ============================================================ ;
 \ : Devices
@@ -723,11 +736,15 @@ cr
   \ SuperForth 2.0, 1985. Modified.
 
 create-device win1_  \ location of BLK1 \ XXX TMP
-create-device nfa1_
-create-device nfa4_
+create-device nfa4_  \ generic Forth sources \ XXX TMP
 create-device dev4_  \ must point to the sfera directory
 create-device dev5_  \ must point to the sfera_bin directory
 dev4_
+
+\ XXX TMP
+.( Devices:) cr
+.(   source files: dev4_) cr
+.(   binary files: dev5_) cr
 
 \ ============================================================ ;
 \ Boot
@@ -738,7 +755,7 @@ dev4_
                     \  but causes an error if the channel
                     \  is already closed...
   win1_ \ XXX TODO -- make this boot device configurable.
-  cold  ;
+  cold  ;  \ XXX FIXME `fence` is restored by `cold`
   \ Boot the system.
 
 \ ============================================================ ;
@@ -1003,14 +1020,17 @@ variable included-files  0 included-files !
 : end-of-file  ( -- )
   end_file include-stack xdepth if  unnest-file  then  ;
 
-include dev4_decode_fs  \ XXX TMP
+\ include dev4_decode_fs  \ XXX TMP
 include dev4_include_code_fs  \ XXX TMP
 \ include-code dev5_three_dup_bin  \ XXX TMP
 \ include-code dev5_to_a_bin  \ XXX TMP
 include dev4_dump_fs
-include-code dev5_get_mode_bin  \ XXX TMP
+\ include-code dev5_get_mode_bin  \ XXX TMP
+\ include-code dev5_machine_bin  \ XXX TMP
 
 here fence !
+
+.sfera
 
 end_file  \ XXX TMP
 
@@ -1032,5 +1052,7 @@ end_file  \ XXX TMP
 \
 \ 2016-01-15: Moved `endcase` to its own file
 \ <standard_endcase_fs>.
+\
+\ 2016-01-25: Some changes.
 
 \ vim: filetype=superforthsfera

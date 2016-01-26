@@ -1,0 +1,39 @@
+\ defer_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net), 2016
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-01-25: Adapted from Afera (http://en.program.afera.html).
+
+\ ==============================================================
+
+: (defer)  ( -- )  14 error  ;
+  \ Default behaviour of an uninitialized deferred word:
+  \ "Unassigned execution vector".
+
+: defer  ( "name" -- )
+  create  ['] (defer) compile,
+  does>   ( -- )  ( pfa )  @ execute  ;
+  \ Create a deferred word.
+
+: defer@  ( cfa1 -- cfa2 )  >body @  ;
+  \ _cfa2_ is the code field address the deferred word _cfa1_
+  \ is set to execute.
+
+: defer!  ( cfa1 cfa2 -- )  >body !  ;
+  \ Set the deferred word _cfa2_ to execute _cfa1_.
+
+end-of-file

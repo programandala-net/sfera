@@ -9,7 +9,7 @@
 # License
 
 # You may do whatever you want with this work, so long as you
-# retain all the copyright/authorship/acknowledgment/credit
+# retain the copyright/authorship/acknowledgment/credit
 # notice(s) and this license in all redistributed copies and
 # derived works.  There is no warranty.
 
@@ -37,6 +37,10 @@
 #
 #     make
 
+# Remove binaries and assembly listings:
+#
+#     make clean
+
 # ==============================================================
 # History
 
@@ -48,6 +52,11 @@
 #
 # 2016-01-15: Added the zip recipe. Updated the backup recipe.
 # Removed old code.
+#
+# 2016-01-24: Separated the creation of assembly listings.
+#
+# 2016-01-26: Restored default assembly listings, which now are
+# much shorter.
 
 # ==============================================================
 # Config
@@ -60,6 +69,7 @@ MAKEFLAGS = --no-print-directory
 # ==============================================================
 # Recipes
 
+lst_files = $(wildcard asm/*_asm_lst)
 asm_files = $(wildcard asm/*_asm)
 bin_files = $(wildcard bin/*_bin)
 
@@ -72,7 +82,24 @@ bin: $(bin_files)
 bin/%_bin: asm/%_asm
 	cd asm ; \
 	asmx -C 68K -e -w -b -o ../$@ -l ../$<_lst ../$< ; \
+	rm -f inc_*_asm_lst ../bin/inc_*_bin ; \
 	cd -
+
+# ----------------------------------------------
+# Clean
+
+clean:
+	rm -f $(lst_files) $(bin_files)
+
+# ----------------------------------------------
+# Debugging
+
+# XXX TMP
+# Assembly listings
+bin/%_asm_lst: asm/%_asm
+	cd asm ; \
+	asmx -C 68K -e -w -b -o ../$@ -l ../$<_lst ../$< ; \
+	cd - ;
 
 # ----------------------------------------------
 # Assemble all sources
@@ -84,6 +111,7 @@ all: $(asm_files)
 		echo "Compiling $$source" ; \
 		asmx -C 68K -e -w -b -o ../bin/$${base_name}_bin -l $${base_name}_asm_lst $$source ; \
 	done ; \
+	rm -f inc_*_asm_lst ../bin/inc_*_bin ; \
 	cd -
 
 # ----------------------------------------------
@@ -123,3 +151,5 @@ backup:
 		sfera/_draft/ \
 		sfera/asm/*_asm ; \
 	cd -
+
+# vim: nolist
