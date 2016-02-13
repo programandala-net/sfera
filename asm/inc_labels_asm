@@ -34,9 +34,20 @@
 ; ToolKit III, by Martin Berndt, Ultrasoft.)
 ;
 ; 2016-01-24: Updated.
+;
+; 2016-01-28: Updated.
+
+; XXX TODO -- remove duplicates
 
 ; ==============================================================
 ; Traps
+
+; SMS
+
+do_ioa    equ 2 ; trap #2
+do_io     equ 3 ; trap #3
+do_relio  equ 4 ; trap #4
+do_rlioa  equ 4 ; trap #4
 
 ; ----------------------------------------------
 ; Manager traps (trap #1)
@@ -148,10 +159,6 @@ io_delet      equ   $00000004
 
 ; SMS
 
-
-do_ioa   equ 2                     ; trap #2
-do_rlioa equ 4                     ; trap #4
-
 ioa_open equ $01                   ; OPEN IOSS channel
 ioa_clos equ $02                   ; CLOSe IOSS channel
 ioa_frmt equ $03                   ; FoRMaT medium on device
@@ -163,7 +170,6 @@ ioa_cnam equ $06                   ; Fetch channel name
 
 no_owner equ 0
 myself   equ -1
-
 
 ; ----------------------------------------------
 ; Serial IO calls (trap #3)
@@ -179,9 +185,6 @@ io_sbyte      equ   $00000005
 io_sstrg      equ   $00000007
 
 ; SMS
-
-do_io equ 3                    ; trap #3
-do_relio equ 4                    ; trap #4
 
 iob_test equ $00                  ; TEST input
 iob_fbyt equ $01                  ; Fetch BYTe from input
@@ -660,8 +663,8 @@ sys_fsdt equ  $0140    ; Filing System drive Definition table Top
 sys_nfsd equ  $10    ; max Number of Filing System Drive definitions
 sys_fsch equ  $0140  ; long  linked list of Filing System CHannel blocks
 
-sys_xact equ  $0144  ; byte  set if XLATE active
-sys_xtab equ  $0146  ; long  pointer to XLATE table
+sys_xact equ  $0144  ; byte  set if XLATE (printer translate) active
+sys_xtab equ  $0146  ; long  pointer to XLATE (printer translate) table
 sys_erms equ  $014a  ; long  pointer to (QDOS) error message table
 sys_mstab equ $014e  ; long  pointer to (SMSQ) message table
 sys_taskm equ $0154  ; 4 long  used by taskmaster - conflicts with
@@ -790,10 +793,7 @@ ut_chan1 equ 1
 ; ==============================================================
 ; SMS2 IOSS operations
 
-do_io   equ  3     ; trap #3
-do_relio equ  4     ; trap #4
-
-; character/byte IO operations
+; Serial (character/byte) IO operations (trap#3)
 
 iob_test equ  $00   ; TEST input
 iob_fbyt equ  $01   ; Fetch BYTe from input
@@ -855,7 +855,6 @@ iog_elip equ  $33   ; draw ELlIPse
 iog_scal equ  $34   ; set graphics SCALe
 iog_fill equ  $35   ; set area FILL
 iog_sgcr equ  $36   ; Set Graphics CuRsor position
-
 
 ; filing system
 
@@ -922,7 +921,7 @@ iow_blkn equ  $5e   ; draw block (native)
 iow_palq equ  $60   ; define QL colour palette
 iow_palt equ  $61   ; define 8 bit palette
 
-;  Pointer I/O trap keys
+;  Pointer I/O trap routines
 
 iop_wpap equ  $6b   ; define wallpaper
 iop_flim equ  $6c   ; Find window LIMits
@@ -1068,6 +1067,6 @@ chp_orel equ    $000c    ; long    Offset of pointer to RELease code from chp_dr
 ; ==============================================================
 
 ; vim: filetype=asm68k
-  
+
   list on
   end

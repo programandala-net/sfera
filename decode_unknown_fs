@@ -26,6 +26,5 @@ decode v_ok
 decode vec_ut
 printer_off
 
-end-of-file
 
 \ vim: filetype=superforth

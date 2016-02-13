@@ -1,0 +1,55 @@
+                        ; a_two_l_store_asm
+
+                        ; This file is part of Sfera, a library for SuperForth
+                        ; http://programandala.net/en.program.sfera.html
+
+                        ; Author: Marcos Cruz (programandala.net), 2016.
+
+                        ; ==============================================================
+                        ; License
+
+                        ; You may do whatever you want with this work, so long as you
+                        ; retain the copyright/authorship/acknowledgment/credit
+                        ; notice(s) and this license in all redistributed copies and
+                        ; derived works.  There is no warranty.
+
+                        ; ==============================================================
+                        ; History
+
+                        ; 2016-01-28: Start.
+
+                        ; ==============================================================
+
+000000                    include 'inc_macros_asm'
+                          list off
+                          list nosym
+                          list notemp
+                          list on
+
+000000                    end
+
+000000                    code 'AL!',a_l_store_end  ; ( d da -- )
+
+                          ; Store long value _d_ into absolute address _da_.
+                          ;
+                          ; The diference with `a2!` is `a2!` stores a Forth double
+                          ; number, thus it stores the high part in the lower cell,
+                          ; while `al!` stores the low part on the lower cell, after the
+                          ; usual order in memory.
+
+                          ; XXX TODO -- try
+
+000008                    pop_d   d5
+000018 2A45               move.l  d5,a5
+00001A                    pop_d   d5
+00002A 2A85               move.l  d5,(a5)
+00002C                    next
+
+       = 000036         a_l_store_end equ *
+
+000036                    end_code_definitions
+
+000038                    end
+
+00000 Total Error(s)
+

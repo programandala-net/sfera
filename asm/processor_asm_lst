@@ -75,7 +75,7 @@
 000012 4E41               trap    #1               ; call mt.inf
                           ; a0 = addresss of system variables
 000014 1028 00A1          move.b  sys_ptyp(a0),d0
-000018                    push_w  d0               ; to the Forth stack
+000018                    push_n  d0               ; to the Forth stack
 00001C 205F               move.l  (sp)+,a0         ; restore SuperForth's a0
 00001E                    next
 

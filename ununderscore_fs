@@ -1,0 +1,77 @@
+\ ununderscore_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net)
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ Description
+
+\ This file renames all original words of SuperForth, replacing
+\ underscores with hyphens. The point the new words added by
+\ Sfera use hyphens, including all standard words. So this
+\ module makes all names homogeneous.
+\
+\ This tool runs automatically and then forgets itself.
+\
+\ At the moment this tool is experimental. The rest of the Sfera
+\ library uses the original words of SuperForth.
+
+\ ==============================================================
+\ History
+
+\ 2016-01-11: Start.
+
+\ ==============================================================
+
+only forth definitions
+
+false [if]  \ XXX OLD -- very slow method
+
+: ununderscore-nfa  ( nfa -- )
+  dup name>length 1- swap 1+ bounds
+  do  i c@ c# _ = if  c# - i c!  then  loop  ;
+
+  \ Replace every underscore with an hyphen in the name of
+  \ _nfa_.  The last char of the name is not checked checked,
+  \ because final underscores are part of device names and must
+  \ be preserved.
+
+[else]  \ XXX NEW
+
+: ununderscore-nfa  ( nfa -- )
+  c# _ over name>string 1- save-counted-string  ( nfa c ca )
+  1 0 loc_char ?dup if    + c# - swap c!
+                    else  drop  then  ;
+
+  \ Search the name of _nfa_ for the first underscore.  If
+  \ found, replace it with an hyphen.  This is enough because no
+  \ word has more than one underscore. The last char of the name
+  \ is not checked, because final underscores are part of device
+  \ names and must be preserved.
+
+[then]
+
+: ununderscore  ( -- )
+  [ ' forth-83 >link ] literal
+  begin
+    \ dup id. space  \ XXX INFORMER
+    dup link>name ununderscore-nfa
+    link>link? 0=
+  until  drop  ;
+
+ununderscore
+forget ununderscore-nfa
+.( Renamed all original SuperForth words.) cr
+
+\ vim: filetype=superforthsfera
+

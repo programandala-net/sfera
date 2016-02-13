@@ -17,8 +17,15 @@
 \ History
 
 \ 2016-01-09: Code extracted from <boot_fs>.
+\
+\ 2016-02-08: Removed `end-of-file`.
+\
+\ 2016-02-10: Added `require dump_address_fs`, after the changes
+\ in <boot_fs>.
 
 \ ==============================================================
+
+require dump_address_fs
 
 : (dump)  ( ca len -- )
   8 2dup mod - + 8 / 0
@@ -33,6 +40,5 @@
   ?dup if  (dump)  else  drop  then  ;
   \ Show the contents of _len_ bytes starting from _ca_.
 
-end-of-file
 
 \ vim: filetype=superforthsfera

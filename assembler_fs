@@ -32,12 +32,14 @@
 \ 8080 F83. Changed `not` to `invert`.
 \
 \ 2016-01-25: Added `defer`. Converted the source to lowercase.
+\
+\ 2016-02-08: Removed `end-of-file`.
 
 \ ==============================================================
 
 only forth also definitions   decimal
 
-require dev4_defer_fs
+require defer_fs
 
 : octal  ( -- )  8 base !  ;
 
@@ -480,4 +482,5 @@ hex
 6C00 constant <    6D00 constant >=
 6E00 constant <=   6F00 constant >
 
-decimal
+d
+\ vim: filetype=superforthsferaecimal

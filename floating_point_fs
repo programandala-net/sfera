@@ -22,10 +22,12 @@
 \
 \ 2016-01-08: Modified to use `code` and `end-code`. Stack
 \ effects, comments.  Words renamed after standard Forth.
+\
+\ 2016-02-08: Removed `end-of-file`.
 
 \ ==============================================================
 
-require dev4_code_fs
+require code_fs
 
 code c_fp  ( ad n1 --- n2 )
   3002 , 4287 , 2f09 , 2f0c , 385b ,
@@ -144,6 +146,5 @@ f$ 65536 fconstant mi
   >r s>f fdup f0< if  mi f+  then
   r> s>f mi f* f+  ;
 
-end-of-file
 
 \ vim: filetype=superforthsfera

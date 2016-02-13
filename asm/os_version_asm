@@ -40,7 +40,7 @@
   move.l d2,d3      ; preserve the result
   move.w (sp)+,d2   ; restore the SuperForth TOS
   move.l (sp)+,a0   ; restore the SuperForth a0
-  push_l d3         ; result
+  push_d d3         ; result
 
   next
 

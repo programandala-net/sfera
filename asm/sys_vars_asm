@@ -39,7 +39,7 @@
   moveq.l #mt_inf,d0
   trap    #1              ; call mt.inf
   ; a0 = addresss of system variables
-  push_l a0               ; to the Forth stack, as a double number
+  push_d a0               ; to the Forth stack, as a double number
   move.l (sp)+,a0         ; restore SuperForth's a0
   next
 

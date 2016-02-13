@@ -77,6 +77,11 @@
 ;
 ; 2016-01-26: Renamed the parameter of `pop_l`, because it must
 ; be a data register.
+;
+; 2016-01-28: Changed suffixes "_w" to "_n" and "_l" to "_d",
+; after the Forth stack notation. Wrote new macros `push_l` and
+; `pop_l` to manage long numbers with high part on TOS and in
+; upper memory.
 
 ; ==============================================================
 
@@ -114,7 +119,7 @@ end_code_definitions macro        ; must be placed at end of the code
 
   endm
 
-push_w macro register
+push_n macro register
 
   ; Push _register_ on the Forth data stack as a 1-cell number.
 
@@ -122,7 +127,7 @@ push_w macro register
   move.w register,d2      ; register -> TOS
   endm
 
-pop_w macro register
+pop_n macro register
 
   ; Pop 1-cell number from the Forth data stack and move it to
   ; _register_.
@@ -131,10 +136,10 @@ pop_w macro register
   move.w (a3)+,d2         ; NOS -> TOS
   endm
 
-push_l macro register
+push_d macro register
 
   ; Push _register_ on the Forth data stack as a 2-cell
-  ; number.
+  ; number, after the Forth order: with the high part on TOS.
 
   move.w d2,-(a3)            ; TOS -> NOS
   move.w register,-(a3) ; low part of register -> NOS
@@ -143,10 +148,12 @@ push_l macro register
 
   endm
 
-pop_l macro data_register
+pop_d macro data_register
 
   ; Pop 2-cell number from the Forth data stack and move it to
-  ; _data_register_.
+  ; _data_register_. The high part is on TOS.
+
+  if 1
 
   move.w    d2,data_register ; high cell to low half of register
   swap      data_register    ; high cell to high half of register
@@ -156,6 +163,46 @@ pop_l macro data_register
   swap      d2
   or.l      d2,data_register ; combine
   move.w    (a3)+,d2         ; new TOS
+
+  else ; XXX NEW
+
+  ; XXX FIXME -- does not work because of sign extension
+
+  move.w    d2,data_register ; high cell to low half of register
+  swap      data_register    ; high cell to high half of register
+  move.w    (a3)+,data_register   ; low cell to low half of register
+  move.w    (a3)+,d2         ; new TOS
+
+  endif
+
+  endm
+
+push_l macro register
+
+  ; Push _register_ on the Forth data stack as a 2-cell
+  ; number, after the memory order: with the low part on TOS.
+
+  ; XXX TODO -- try
+
+  move.w d2,-(a3)             ; TOS -> NOS
+  move.w register,d2          ; low part of register -> TOS
+  swap register               ; high part of register...
+  move.w register,-(a3)       ; ... -> NOS
+
+  endm
+
+pop_l macro register
+
+  ; Pop 2-cell number from the Forth data stack and move it to
+  ; _register_. The low part is on TOS.
+
+  ; XXX TODO -- try
+
+  move.w    d2,register     ; low part
+  swap      register
+  move.w    (a3)+,register  ; high part
+  swap      register
+  move.w    (a3)+,d2        ; new TOS
 
   endm
 

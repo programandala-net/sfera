@@ -1,4 +1,4 @@
-                        ; aunused_asm
+                        ; a_unused_asm
 
                         ; This file is part of Sfera, a library for SuperForth
                         ; http://programandala.net/en.program.sfera.html
@@ -29,6 +29,8 @@
                         ; returned the unused space usable by SuperBASIC.
                         ;
                         ; 2016-01-26: Updated comments and header.
+                        ;
+                        ; 2016-02-08: Renamed file and labels.
 
                         ; ==============================================================
 
@@ -44,17 +46,17 @@
                           list on
 000000                    end
 
-000000                    code 'aunused',aunused_end  ; ( -- d )
+000000                    code 'aunused',a_unused_end  ; ( -- d )
 
 00000C 48E7 20F0          movem.l     a0-a3/d2,-(sp)  ; save the SuperForth registers
 000010 7006               moveq #sms_frtp,d0
 000012 4E41               trap  #1
 000014 4CDF 0F04          movem.l (sp)+,a0-a3/d2      ; restore the SuperForth registers
-000018                    push_l d1                   ; result
+000018                    push_d d1                   ; result
 
 000020                    next
 
-       = 00002A         aunused_end equ *
+       = 00002A         a_unused_end equ *
 
 00002A                    end_code_definitions
 

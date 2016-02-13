@@ -19,6 +19,8 @@
 \ 2016-01-06: Code extracted from <boot.fs>.
 \
 \ 2016-01-12: Updated: `link>link? 0=` instead of `first-word?`.
+\
+\ 2016-02-08: Removed `end-of-file`.
 
 \ ==============================================================
 
@@ -29,6 +31,5 @@
     link>link? 0= escape-key? or
   until  drop  ;
 
-end-of-file
 
 \ vim: filetype=superforthsfera

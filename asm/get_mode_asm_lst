@@ -62,7 +62,7 @@
 00001E 1001               move.b  d1,d0           ;mode number for conversion to fp
 
 000020 341F               move.w (sp)+,d2         ; restore SuperForth's TOS
-000022                    push_w d0
+000022                    push_n d0
 000026                    next
 
        = 000030         get_mode_end equ *

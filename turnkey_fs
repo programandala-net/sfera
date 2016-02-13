@@ -26,6 +26,8 @@
 \ 2016-01-15: First tries. Some notes.
 \
 \ 2016-01-23: Check. Note.
+\
+\ 2016-02-08: Removed `end-of-file`.
 
 \ ==============================================================
 
@@ -36,15 +38,16 @@
   latest ['] cold 4 + !
   fence 2+ @ 32840 !  ;   \ voc-link
 
-: dename  ( -- )
-  forth latest
-  begin
-    dup link>name dup c@ /name and erase
-    link>link? 0=
-  until  ;
+\ XXX OLD
+\ : dename  ( -- )
+\   forth latest
+\   begin
+\     dup link>name dup c@ /name and erase
+\     link>link? 0=
+\   until  ;
 
 : turnkey ( cfa -- )
-  ['] cold 62 + ! cls
+  [ ' cold 62 + ] literal ! cls
   ." How much data space? " query bl-word number d->s cr cr
   ." Return to SuperBASIC with CTRL C, then type:" cr cr
   ." sexec <filename>," 32776 2@ 4096. d- d.
@@ -52,7 +55,8 @@
   \ XXX TODO save the file here, not in SuperBASIC
 
 : save-application  ( "name" -- )
-  map ' turnkey dename
+  map ' turnkey
+  \ dename  \ XXX OLD
   ." Then remove SuperForth since it cannot be re-entered." cr cr
   sleep  ;
   \ XXX FIXME -- this works, but the new program,
@@ -64,4 +68,4 @@
   \ XXX FIXME -- the system is saved, but only words of the
   \ original system are preserved, even after setting `fence`.
 
-end-of-file
+\ vim: filetype=superforthsfera

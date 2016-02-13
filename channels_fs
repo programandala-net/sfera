@@ -1,0 +1,99 @@
+\ channels_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net)
+\ 
+\ Credit: This code is based on the channels information written
+\ by Simon N Goodwin for his DIY Toolkit - CHAN functions, 1988.
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-01-27: Start.
+\
+\ 2016-02-08: Removed `end-of-file`.
+\
+\ 2016-02-10: Added <include_code_fs>.
+
+\ ==============================================================
+
+require include_code_fs
+require-code sys_vars_bin
+require-code channel_to_da_bin
+
+\ XXX FIXME -- nothing works
+
+: win-base  ( d -- ad )  channel>da 50. d+ a2@  ;
+  \ Address _ad_ of top left of screen of window channel id _d_.
+
+: win-ink  ( d -- b )  channel>da 70. d+ ac@  ;
+  \ Ink color _b_ of window channel id _d_.
+
+: win-paper  ( d -- b )  channel>da 68. d+ ac@  ;
+  \ Paper color _b_ of window channel id _d_.
+
+: win-width  ( d -- n )  channel>da 28. d+ a@  ;
+  \ Pixel width _n_ of window channel id _d_.
+
+: win-height  ( d -- n )  channel>da 30. d+ a@  ;
+  \ Pixel width _n_ of window channel id _d_.
+
+: win-xpos  ( d -- n )  channel>da 34. d+ a@  ;
+  \ Cursor X coordinate _n_ of window channel id _d_.
+
+: win-ypos  ( d -- n )  channel>da 36. d+ a@  ;
+  \ Cursor Y coordinate _n_ of window channel id _d_.
+
+: win-xmin  ( d -- n )  channel>da 24. d+ a@  ;
+  \ X coordinate _n_ of left edge of window channel id _d_.
+
+: win-ymin  ( d -- n )  channel>da 26. d+ a@  ;
+  \ Y coordinate _n_ of top edge of window channel id _d_.
+
+: win-cursor-height  ( d -- n )  channel>da 40. d+ a@  ;
+  \ Vertical character spacing / cursor height in pixels _n_
+  \ of window channel id _d_.
+
+: win-cursor-width  ( d -- n )  channel>da 38. d+ a@  ;
+  \ Horizontal character spacing / cursor width in pixels _n_
+  \ of window channel id _d_.
+
+: win-attr  ( d -- b )  channel>da 66. d+ ac@  ;
+  \ Y coordinate _n_ of top edge of window channel id _d_.
+
+: win-underline?          ( d -- f )  win-attr b# 00000001 and 0<>  ;
+: win-flash?              ( d -- f )  win-attr b# 00000010 and 0<>  ;
+: win-transparent-bg?     ( d -- f )  win-attr b# 00000100 and 0<>  ;
+: win-overprinting?       ( d -- f )  win-attr b# 00001000 and 0<>  ;
+: win-tall-text?          ( d -- f )  win-attr b# 00010000 and 0<>  ;
+: win-double-width-text?  ( d -- f )  win-attr b# 00100000 and 0<>  ;
+
+: win-font1  ( d -- da )  channel>da 42. d+ ac@  ;
+  \ Address _da_ font 1 of window channel id _d_.
+
+: win-font2  ( d -- da )  channel>da 46. d+ ac@  ;
+  \ Address _da_ font 2 of window channel id _d_.
+
+: channel-mem-pos  ( d -- da )  channel>da 24. d+ a@  ;
+  \ Next address _da_ for mem I/O.
+
+: win-center-column  ( d -- n )
+  2dup win-width >r win-cursor-width 2* /  ;
+  \ Center column _n_ of window channel id _d_.
+
+: win-center-line  ( d -- n )
+  2dup win-height >r win-cursor-height 2* /  ;
+  \ Center column _n_ of window channel id _d_.
+
+
+\ vim: filetype=superforthsfera

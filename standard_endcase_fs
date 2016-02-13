@@ -3,7 +3,7 @@
 \ This file is part of Sfera, a library for SuperForth
 \ http://programandala.net/en.program.sfera.html
 
-\ Auchor: Marcos Cruz (programandala.net), 2016.
+\ Author: Marcos Cruz (programandala.net), 2016.
 
 \ ==============================================================
 \ License
@@ -54,6 +54,8 @@
 \ History
 
 \ 2016-01-15: Code extracted from the main file of the library.
+\
+\ 2016-02-08: Removed `end-of-file`. Fixed typo.
 
 \ ==============================================================
 
@@ -67,6 +69,5 @@
 
 ' dup 38752 !  \ hack `default` to compile `dup` instead of `drop`
 
-end-of-file
 
 \ vim: filetype=superforthsfera

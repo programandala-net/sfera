@@ -48,7 +48,7 @@
 000010 7000               moveq.l #mt_inf,d0
 000012 4E41               trap    #1              ; call mt.inf
                           ; a0 = addresss of system variables
-000014                    push_l a0               ; to the Forth stack, as a double number
+000014                    push_d a0               ; to the Forth stack, as a double number
 00001C 205F               move.l (sp)+,a0         ; restore SuperForth's a0
 00001E                    next
 

@@ -43,9 +43,9 @@
 
   movem.l   a0-a2,-(sp)         ; save SuperForth registers
 
-  pop_l     d3
+  pop_d     d3
   move.l    d3,a0               ; a0 = channel id
-  pop_l     d3
+  pop_d     d3
   move.l    d3,a1               ; a1 = base of font
   clr.l     a2                  ; a2 = base of second font
 
@@ -53,13 +53,13 @@
   moveq     #forever,d3         ; time out
   trap      #3                  ; do it
 
-  push_w    d0                  ; error code
+  push_n    d0                  ; error code
 
   movem.l   (sp)+,a0-a2         ; restore SuperForth registers
 
   next
 
-set_font_end
+set_font_end equ *
 
   end_code_definitions
 

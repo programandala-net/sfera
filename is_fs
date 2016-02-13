@@ -14,14 +14,27 @@
 \ derived works.  There is no warranty.
 
 \ ==============================================================
+\ Description
+
+\ This file defines standard Forth's `is`, and Gforth's `[is]`
+\ and `<is>`. 
+\ 
+\ These words are compatible with words created by Superforth
+\ `exvec:`.
+
+\ ==============================================================
 \ History
 
 \ 2016-01-25: Adapted from Solo Forth
 \ (http://en.program.solo_forth.html).
+\
+\ 2016-02-08: Removed `end-of-file`.
+\
+\ 2016-02-11: Added description.
 
 \ ==============================================================
 
-require dev4_defer_fs
+require defer_fs
 
 : <is>  ( xt "name" -- )  ' defer!  ;
 
@@ -30,7 +43,5 @@ require dev4_defer_fs
 
 : is  ( xt "name" -- )
   compiling? if  postpone [is]  else  <is>  then  ; immediate
-
-end-of-file
 
 \ vim: filetype=superforthsfera

@@ -14,14 +14,26 @@
 \ derived works.  There is no warranty.
 
 \ ==============================================================
+\ Description
+
+\ This file defines standard Forth's `defers`.
+\ 
+\ This word is compatible with words created by Superforth
+\ `exvec:`.
+
+\ ==============================================================
 \ History
 
 \ 2016-01-25: Adapted from Solo Forth
 \ (http://en.program.solo_forth.html).
+\
+\ 2016-02-08: Removed `end-of-file`.
+\
+\ 2016-02-11: Added description.
 
 \ ==============================================================
 
-require dev4_defer_fs
+require defer_fs
 
 : defers  ( "name" -- )
   ' defer@ compile,  ; immediate
@@ -31,7 +43,4 @@ require dev4_defer_fs
   \
   \ Origin: Gforth.
 
-end-of-file
-
 \ vim: filetype=superforthsfera
-

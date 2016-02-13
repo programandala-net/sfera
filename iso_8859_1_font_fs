@@ -18,6 +18,8 @@
 \ History
 
 \ 2016-01-11: Adapted from the original SuperBasic data format.
+\
+\ 2016-02-08: Removed `end-of-file`.
 
 \ ==============================================================
 \ Credit
@@ -196,6 +198,5 @@ hex
 
 decimal
 
-end-of-file
 
 \ vim: filetype=superforthsfera

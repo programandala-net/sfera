@@ -1,4 +1,4 @@
-                        ; aallocate_asm
+                        ; a_allocate_asm
 
                         ; This file is part of Sfera, a library for SuperForth
                         ; http://programandala.net/en.program.sfera.html
@@ -34,6 +34,8 @@
                         ; returns the address, even when the operation fails; this makes
                         ; the code simpler and shorter.  Documented the words after
                         ; Forth-2012.
+                        ;
+                        ; 2016-02-08: Renamed file and labels.
 
                         ; ==============================================================
 
@@ -49,7 +51,7 @@
                           list on
 000000                    end
 
-000000                    code 'aallocate',aallocate_end  ; ( d -- da ior )
+000000                    code 'aallocate',a_allocate_end  ; ( d -- da ior )
 
                           ; Allocate _d_ bytes of contiguous data space from the common
                           ; heap. If the allocation succeeds, _da_ is the aligned
@@ -62,7 +64,7 @@
                           ; named after other SuperForth words that access absolute
                           ; addresses of the system.
 
-00000E                    pop_l       d1
+00000E                    pop_d       d1
 00001E 48E7 20F0          movem.l     a0-a3/d2,-(sp)  ; save the SuperForth registers
 
 000022 243C FFFFFFFF      move.l      #-1,d2          ; this job will own the memory
@@ -71,12 +73,12 @@
 
 00002C 2208               move.l      a0,d1
 00002E 4CDF 0F04          movem.l     (sp)+,a0-a3/d2  ; restore the SuperForth registers
-000032                    push_l      d1              ; push the address
-00003A                    push_w      d0              ; push ior
+000032                    push_d      d1              ; push the address
+00003A                    push_n      d0              ; push ior
 
 00003E                    next
 
-       = 000048         aallocate_end equ *
+       = 000048         a_allocate_end equ *
 
 000048                    code 'afree',afree_end  ; ( da -- ior )
 
@@ -93,14 +95,14 @@
                           ; named after other SuperForth words that access absolute
                           ; addresses of the system.
 
-000052                    pop_l       d1
+000052                    pop_d       d1
 000062 48E7 20F0          movem.l a0-a3/d2,-(sp)      ; save the SuperForth registers
 000066 2041               move.l      d1,a0
 000068 7019               moveq       #mt_rechp,d0    ; select mt.rechp, return the memory
 00006A 4E41               trap        #1              ; call the system routine to return it
 00006C 7000               moveq       #0,d0           ; ior = no error
 00006E 4CDF 0F04          movem.l (sp)+,a0-a3/d2      ; restore the SuperForth registers
-000072                    push_w      d0              ; push ior
+000072                    push_n      d0              ; push ior
 000076                    next
 
        = 000080         afree_end equ *

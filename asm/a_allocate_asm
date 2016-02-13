@@ -1,4 +1,4 @@
-; aallocate_asm
+; a_allocate_asm
 
 ; This file is part of Sfera, a library for SuperForth
 ; http://programandala.net/en.program.sfera.html
@@ -34,13 +34,15 @@
 ; returns the address, even when the operation fails; this makes
 ; the code simpler and shorter.  Documented the words after
 ; Forth-2012.
+;
+; 2016-02-08: Renamed file and labels.
 
 ; ==============================================================
 
   include 'inc_macros_asm'
   include 'inc_labels_asm'
 
-  code 'aallocate',aallocate_end  ; ( d -- da ior )
+  code 'aallocate',a_allocate_end  ; ( d -- da ior )
 
   ; Allocate _d_ bytes of contiguous data space from the common
   ; heap. If the allocation succeeds, _da_ is the aligned
@@ -53,7 +55,7 @@
   ; named after other SuperForth words that access absolute
   ; addresses of the system.
 
-  pop_l       d1
+  pop_d       d1
   movem.l     a0-a3/d2,-(sp)  ; save the SuperForth registers
 
   move.l      #-1,d2          ; this job will own the memory
@@ -62,12 +64,12 @@
 
   move.l      a0,d1
   movem.l     (sp)+,a0-a3/d2  ; restore the SuperForth registers
-  push_l      d1              ; push the address
-  push_w      d0              ; push ior
+  push_d      d1              ; push the address
+  push_n      d0              ; push ior
 
   next
 
-aallocate_end equ *
+a_allocate_end equ *
 
   code 'afree',afree_end  ; ( da -- ior )
 
@@ -84,14 +86,14 @@ aallocate_end equ *
   ; named after other SuperForth words that access absolute
   ; addresses of the system.
 
-  pop_l       d1
+  pop_d       d1
   movem.l a0-a3/d2,-(sp)      ; save the SuperForth registers
   move.l      d1,a0
   moveq       #mt_rechp,d0    ; select mt.rechp, return the memory
   trap        #1              ; call the system routine to return it
   moveq       #0,d0           ; ior = no error
   movem.l (sp)+,a0-a3/d2      ; restore the SuperForth registers
-  push_w      d0              ; push ior
+  push_n      d0              ; push ior
   next
 
 afree_end equ *

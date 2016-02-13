@@ -1,0 +1,34 @@
+\ dot_keyrows_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net), 2016
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-02-10: Extracted from <boot_fs>.
+
+\ ==============================================================
+
+: .keyrow  ( n -- )
+  0 over at dup . keyrow 8bin.  ;
+  \ Print keyrow _n_.
+
+: .keyrows  ( n -- )
+  s->d time d+
+  begin
+    8 0 do  i .keyrow  loop  2dup time d<
+  until  2drop  ;
+  \ Print the keyboard matrix during _n_ seconds.
+
+\ vim: filetype=superforthsfera

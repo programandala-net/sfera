@@ -1,6 +1,6 @@
 = Sfera versions history
 :author: Marcos Cruz (programandala.net)
-:revdate: 2016-01-26
+:revdate: 2016-02-13
 
 // This file is part of Sfera, a library for SuperForth
 // http://programandala.net/en.program.sfera.html
@@ -76,3 +76,35 @@ in Forth or binary files.
 - New: standard deferred words: `defer`, `defer!`, `defer@`, `defers`,
   `action-of`, `is`.
 - Removed `win-base-len`, which still is a draft.
+
+== 0.3.0+20160213
+
+Main changes:
+
+- Improvement: included files don't need `end-of-file` anymore.
+- New: 8 configurable paths for source files.
+- New: `s"` (finished), `slit`, `sliteral`, `s+`.
+- New: circular string buffer.
+
+Other changes:
+
+- Improvement: one loader for every binary module, so all modules can
+  be loaded with the standard words, no matter if they are coded in
+  Forth or assembly.
+- New: `al@`, a variant of `a2@` which puts the low part on top of
+  stack.
+- Fix: the limit of nested sources is checked.
+- Change: files of `aallocate` and `aunused` are renamed, according to
+  the convention representing Forth word names by their components,
+  the way they are pronounced.
+- New: `dp`, `align`, `move`.
+- Change: `uppercase` expects an address and a length.
+- Change: Moved `dump-address`, `allocate`, `save-mem` and `?\` to
+  their own files.
+- New: `?os-error`.
+- Fix: `set-default-channel`.
+- New: __bench_fs__.
+- Fix: renaming of `unused` to `spared`.
+- New: `ununderscore`, a tool for renaming the original words of
+  SuperForth.
+ 

@@ -1,5 +1,5 @@
 = Sfera TO-DO
-:revdate: 2016-01-26
+:revdate: 2016-02-13
 
 // This file is part of Sfera, a library for SuperForth
 // http://programandala.net/en.program.sfera.html
@@ -20,8 +20,10 @@ finished yet (they include a note).
 
 Write:
 
-  boot-device  ( -- ca len )
+----
+  get-boot-device  ( -- ca len )
   \ Return the current boot device.
+----
 
 2016-01-05:
 
@@ -43,15 +45,24 @@ Undocumented words:
   j_s
   kr \ called by `keyrow`
   ld_job 
+  seek
   sl
   sw
   to_pad
-  trap3
-  trap3*
-  v_ok
   vec_ut
 ----
+
+Undocumented words already guessed from the disassembly (as of
+2016-02-11):
   
+----
+v_ok  ( -- )  \ print "ok" on the default channel
+trap1  ( rd1.w rd0.w rd2.w -- d-rd1.l rd2.w )
+trap3  ( ra1.w rd0.w ra0.w rd2.w -- ra1.w rd1.w rd0,w )
+trap3*  ( ra1.w rd0.w ra0.w rd1.w rd2.w -- ra1.w rd1.w rd0,w )
+compare  ( ca1 ca2 method -- n )
+----
+
 Note: It seems vocabularies are chained, like in fig-Forth.
 
 Doubt: User variables, but no `user`?
@@ -61,10 +72,6 @@ Write a code word to change the font.
 2016-01-06:
 
 Implement `warnings`, maybe by hacking `(error)`.
-
-2016-01-09:
-
-Implement paths.
 
 2016-01-10:
 
@@ -100,13 +107,7 @@ Some words are defined in the <boot_fs> file, but also in their own
 files, because it's not yet decided wether they will be part of the
 library core or optional.
 
-`nip` is defined in machine code in the core, but it also has a
-<nip_fs> file which loads the assembled binary. This is just an idea
-for a future version: create a _fs file for every _bin file. This way
-the programmer does not need to know wether a word or module is
-written in Forth or in assembly.
-
-No documentation yet.
+Write basic documentation.
 
 2016-01-22:
 
@@ -120,3 +121,17 @@ Write `aresize`.
 
 Finish `win-line-len` and `win-base`.
 Finish the conversion of `bmp8load`.
+
+2016-01-28:
+
+Try the new and modified macros.
+
+Fix <channel_to_ad_asm>.
+
+2016-02-11:
+
+Use the circular string buffer instead of the `name` buffer.
+
+2016-02-12:
+
+Fix `no-key`.

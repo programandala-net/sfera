@@ -1,0 +1,31 @@
+\ save_mem_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net), 2016
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-02-10: Extracted from <boot_fs>.
+
+\ ==============================================================
+
+require allocate_fs
+
+: save-mem  ( ca1 len -- ca2 len )
+  swap >r
+  dup allocate throw
+  swap 2dup r> rot rot move  ;
+  \ Copy a memory block into a newly allocated region in the
+  \
+  \\ vim: filetype=superforthsfera heap.

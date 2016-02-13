@@ -19,7 +19,10 @@
 \ History
 
 \ 2016-01-08: Start.
+\
 \ 2016-01-23: Updated header.
+\
+\ 2016-02-08: Removed `end-of-file`.
 
 
 \ ==============================================================
@@ -56,6 +59,5 @@ variable abase  \ backup of `base`
 
 current !
 
-end-of-file
 
 \ vim: filetype=superforthsfera

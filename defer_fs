@@ -14,20 +14,33 @@
 \ derived works.  There is no warranty.
 
 \ ==============================================================
+\ Description
+
+\ This file defines standard Forth's `defer`, `defer!` and
+\ `defer@`. 
+\ 
+\ Words created by `defer` are compatible with Superforth
+\ `assign` and `to-do`, while `defer!` and `defer@` are
+\ compatible with words created by SuperForth `exvec:`.
+
+\ ==============================================================
 \ History
 
 \ 2016-01-25: Adapted from Afera (http://en.program.afera.html).
+\
+\ 2016-02-08: Removed `end-of-file`.
+\
+\ 2016-02-11: Simplified `defer` with headerless error word.
+\ Added description.
 
 \ ==============================================================
 
-: (defer)  ( -- )  14 error  ;
-  \ Default behaviour of an uninitialized deferred word:
-  \ "Unassigned execution vector".
-
 : defer  ( "name" -- )
-  create  ['] (defer) compile,
+  create  h# 954C compile,
   does>   ( -- )  ( pfa )  @ execute  ;
   \ Create a deferred word.
+  \ Note: $954C is the cfa of the SuperForth headerless word
+  \ which issues an "Unassigned execution vector" error.
 
 : defer@  ( cfa1 -- cfa2 )  >body @  ;
   \ _cfa2_ is the code field address the deferred word _cfa1_
@@ -36,4 +49,5 @@
 : defer!  ( cfa1 cfa2 -- )  >body !  ;
   \ Set the deferred word _cfa2_ to execute _cfa1_.
 
-end-of-file
+
+\ vim: filetype=superforthsfera

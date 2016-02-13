@@ -1,0 +1,29 @@
+\ question_backslash_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net)
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-01-11: Code extracted from <boot.fs>.
+
+\ ==============================================================
+
+
+: ?\  ( f "ccc<eol>" -- )
+  if  [compile] \
+  then  ; immediate
+  \ If _f_ is not zero, ignore the rest of the input stream line
+
+\ vim: filetype=superforthsfera

@@ -17,13 +17,16 @@
 \ History
 
 \ 2016-01-11: Start.
+\
 \ 2016-01-15: Updated.
+\
+\ 2016-02-08: Removed `end-of-file`.
 
 \ ==============================================================
 
 \ XXX TMP paths
 \ XXX TODO -- use the path system, when available
-require dev4_include_code_fs
-require-code dev5_nip_bin
+require include_code_fs
+require-code nip_bin
 
 \ vim: filetype=superforthsfera

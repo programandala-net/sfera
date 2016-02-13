@@ -34,7 +34,7 @@
 
 forth definitions decimal
 
-require dev4_standard_endcase_fs
+require standard_endcase_fs
 
 variable decode-level  decode-level off
   \ depth of nesting
@@ -50,18 +50,24 @@ h# 8020 constant 85-cfa  ( -- n )
 h# 839A constant (do)-cfa
 h# 83AC constant (loop)-cfa
 h# 83B8 constant (+loop)-cfa
-h# 87C6 constant do-colon
-h# 879A constant do-create
+h# 865E constant trap3*-cfa
+h# 866E constant trap3-cfa
+h# 867C constant trap1-cfa
 h# 877C constant do-constant
-h# 96D0 constant do-2constant
+h# 879A constant do-create
 h# 87AA constant do-user
+h# 87C6 constant do-colon
 h# 8824 constant lit-cfa  ( -- )
+h# 8840 constant slit-cfa
 h# 88D0 constant dp-cfa
 h# 8BF0 constant (does>)-cfa
 h# 9284 constant unknown-9284-cfa
 h# 92A4 constant unknown-92a4-cfa
 h# 930E constant ?pairs-cfa  ( -- )
+h# 954C constant vec-error-cfa  ( -- )
+h# 96D0 constant do-2constant
 h# 9860 constant unknown-9860-cfa
+h# 9860 constant ?os-error-cfa  ( n -- )
 h# 9874 constant unknown-9874-cfa
 h# 988C constant unknown-988c-cfa
 h# 9898 constant unknown-9898-cfa
@@ -69,9 +75,9 @@ h# 98AE constant unknown-98ae-cfa
 h# 997A constant case-mask-cfa
 h# 99B6 constant unknown-99b6-cfa
 h# 9AC8 constant (read")-cfa
+h# 9D9A constant index-out-of-range?-cfa  ( ca n -- ca n f )
 h# 9F34 constant quote-cfa  ( -- c )
 h# 9FD2 constant unknown-9fd2-cfa
-h# 9D9A constant index-out-of-range?-cfa  ( ca n -- ca n f )
 
 \ ----------------------------------------------
 \ Checks
@@ -123,9 +129,16 @@ h# 9D9A constant index-out-of-range?-cfa  ( ca n -- ca n f )
     (do)-cfa                of  ." (do)"                 endof
     (+loop)-cfa             of  ." (+loop)"              endof
     lit-cfa                 of  ." lit"                  endof
+    slit-cfa                of  ." slit"                 endof
     dp-cfa                  of  ." dp"                   endof
     ?pairs-cfa              of  ." ?pairs"               endof
     case-mask-cfa           of  ." case-mask"            endof
+    trap1-cfa               of  ." trap1"                endof
+    trap3-cfa               of  ." trap3"                endof
+    trap3*-cfa              of  ." trap3*"               endof
+    dp-cfa                  of  ." dp"                   endof
+    vec-error-cfa           of  ." vec-error"            endof
+    ?os-error-cfa           of  ." ?os-error"            endof
     unknown-9284-cfa        of  ." 9284-cfa"             endof
     unknown-92a4-cfa        of  ." 92A4-cfa"             endof
     unknown-9860-cfa        of  ." 9860-cfa"             endof
@@ -354,7 +367,6 @@ assign decode-pfa to-do (decode-pfa)  ( pfa -- )
   repeat  drop  manual-decode ;
   \ Decode all SuperForth words.
 
-end-of-file
 
 \ ==============================================================
 \ History
@@ -384,5 +396,12 @@ end-of-file
 \ 2016-01-12: Updated: `link>link?` instead of `first-word? 0=`.
 \
 \ 2016-01-23: Comments.
+\
+\ 2016-02-08: Removed `end-of-file`.
+\
+\ 2016-02-10: Added `trap1-cfa`, `trap3-cfa`, `trap3*-cfa`,
+\ `slit-cfa`, `?os-error-cfa`.
+\
+\ 2016-02-11: Typo.
 
 \ vim: filetype=superforthsfera

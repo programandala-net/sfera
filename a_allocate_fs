@@ -1,0 +1,26 @@
+\ a_allocate_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net), 2016
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-02-08: Start.
+
+\ ==============================================================
+
+require include_code_fs
+require-code a_allocate_bin
+
+\ vim: filetype=superforthsfera

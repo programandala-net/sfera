@@ -1,6 +1,6 @@
 = Sfera
 :author: Marcos Cruz (programandala.net)
-:revdate: 2016-01-26
+:revdate: 2016-02-13
 
 // This file is part of Sfera, a library for SuperForth
 // http://programandala.net/en.program.sfera.html
@@ -23,8 +23,12 @@ Digital Precision in 1985.
 - http://programandala.net/en.program.sfera.history.html[Sfera
   development history]
 
-The development is done on http://raspbian.org[Raspbian] and the
-testings are done on http://www.wlenerz.com/SMSQmulator/[SMSQmulator].
+The development is done on a
+http://programandala.net/en.computer.raspesis.0x07.html[homemade portable Raspberry Pi 2]
+with the
+http://raspbian.org[Raspbian]
+operating system and
+http://www.wlenerz.com/SMSQmulator/[SMSQmulator].
 
 == Directories and files
 
@@ -39,12 +43,21 @@ sfera/asm/:: Sources of words written in assembly (_asm extension)
 and their assembler listings (_asm_lst extension).
 sfera/bin/:: Binaries of words written in assembly (_bin extension).
 
-== QL devices
+== User configuration
 
-At the moment, the following devices are used in the sources, and they
-must be configured in your QDOS or SMSQ/E system:
+The __boot_fs__ file has a user configuration section at the end,
+where default devices, windows and paths are configured.
+
+=== QL devices
+
+By default device _dev4_ is configured as path 1 for Forth sources,
+and therefore it must be configured in your QDOS or SMSQ/E system this
+way:
 
 ----
 dev_use 4, "path_to_sfera_"
-dev_use 5, "path_to_sfera_bin_"
 ----
+
+Also device _nfa4_, which is specific of the
+http://www.wlenerz.com/SMSQmulator/[SMSQmulator] emulator, is used as
+path 3.

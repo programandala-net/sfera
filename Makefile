@@ -56,7 +56,7 @@
 # 2016-01-24: Separated the creation of assembly listings.
 #
 # 2016-01-26: Restored default assembly listings, which now are
-# much shorter.
+# much shorter. Added VERSIONS.adoc>.
 
 # ==============================================================
 # Config
@@ -129,6 +129,7 @@ zip:
 		sfera/LICENSE.txt \
 		sfera/Makefile \
 		sfera/README.adoc \
+		sfera/VERSIONS.adoc \
 		sfera/TO-DO.adoc \
 		sfera/asm/*_asm \
 		sfera/bin/* && \
@@ -147,6 +148,7 @@ backup:
 		sfera/LICENSE.txt \
 		sfera/Makefile \
 		sfera/README.adoc \
+		sfera/VERSIONS.adoc \
 		sfera/TO-DO.adoc \
 		sfera/_draft/ \
 		sfera/asm/*_asm ; \

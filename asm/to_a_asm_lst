@@ -37,45 +37,45 @@
                           ; Convert SuperForth address _a_ to absolute OS address _da_.
 
                           ; XXX OLD
-                          ; pop_w d0
+                          ; pop_n d0
                           ; swap d0
                           ; clr.w d0    ; clear high half while it's low
                           ; swap d0
                           ; move.l a2,d1
                           ; add.l d1,d0
-                          ; push_l d0
+                          ; push_d d0
 
                           ; XXX OLD
                           ; moveq #0,d0
-                          ; pop_w d0
+                          ; pop_n d0
                           ; move.l a2,d1
                           ; add.l d1,d0
-                          ; push_l d0
+                          ; push_d d0
 
                           ; XXX OLD
                           ; moveq #0,d0
-                          ; pop_w d0
+                          ; pop_n d0
                           ; move.l a2,a5
                           ; adda.w d0,a5
-                          ; push_l a5
+                          ; push_d a5
 
                           ; XXX OLD
                           ; moveq #0,d0
-                          ; pop_w d0
+                          ; pop_n d0
                           ; move.l a2,a5
                           ; adda.w d0,a5
-                          ; push_l a5
+                          ; push_d a5
 
                           ; XXX OLD
-                          ; pop_w d0
+                          ; pop_n d0
                           ; swap d0
                           ; clr.w d0    ; clear high half while it's low
                           ; swap d0
                           ; move.l a2,a5
                           ; adda.w d0,a5
-                          ; push_l a5
+                          ; push_d a5
 
-000008                    pop_w d0
+000008                    pop_n d0
                           ;swap d0
                           ;clr.w d0    ; clear high half while it's low
                           ;swap d0
@@ -87,7 +87,7 @@
                         ;  sub.l #$8000,d0  ; XXX returns 19F6E8
                         ;                   ; XXX returns 1A76E8
                         ;  add.l #$8000,d0  ; XXX returns 1AF6E8
-000014                    push_l d0
+000014                    push_d d0
 
 
 00001C                    next
@@ -97,9 +97,9 @@
                           ; code '>A0',to_a0_end  ; ( a -- da )
 
                           ; moveq #0,d0
-                          ; pop_w d0
+                          ; pop_n d0
                           ; add.l a2,d0
-                          ; push_l d0
+                          ; push_d d0
                           ; next
 
                         ; to_a0_end equ *

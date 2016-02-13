@@ -17,7 +17,10 @@
 \ History
 
 \ 2016-01-11: Start.
+\
 \ 2016-01-15: Fixed.
+\
+\ 2016-02-08: Removed `end-of-file`.
 
 \ ==============================================================
 
@@ -36,7 +39,6 @@
   \ Show the contents of _len_ bytes starting from absolute
   \ address _da_.
 
-end-of-file
 
 \ vim: filetype=superforthsfera
 

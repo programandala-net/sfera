@@ -52,9 +52,9 @@
                           ; a0 = address of system variables
 000018 2A68 00C4          move.l  sys_clnk(a0),a5   ; a5 = console linkage block
 00001C 302D 00F2          move.w  pt_xscrs(a5),d0   ; d0 = x
-000020                    push_w  d0                ; push x on the Forth stack
+000020                    push_n  d0                ; push x on the Forth stack
 000024 302D 00F4          move.w  pt_yscrs(a5),d0   ; d0 = y
-000028                    push_w  d0                ; push y on the Forth stack
+000028                    push_n  d0                ; push y on the Forth stack
 
 00002C 205F               move.l  (sp)+,a0          ; restore SuperForth's a0
 

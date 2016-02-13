@@ -1,0 +1,36 @@
+\ bench_fs
+
+\ This file is part of Sfera, a library for SuperForth
+\ http://programandala.net/en.program.sfera.html
+
+\ Author: Marcos Cruz (programandala.net), 2015, 2016.
+
+\ ==============================================================
+\ License
+
+\ You may do whatever you want with this work, so long as you
+\ retain the copyright/authorship/acknowledgment/credit
+\ notice(s) and this license in all redistributed copies and
+\ derived works.  There is no warranty.
+
+\ ==============================================================
+\ History
+
+\ 2016-02-11: Adapted from Solo Forth
+\ (http://programandala.net/en.program.solo_forth.html).
+
+\ ==============================================================
+
+: bench{  ( -- d )  time  ;
+  \ Start timing.
+
+: }bench  ( d1 -- d2 )  time 2swap d-  ;
+  \ Stop timing.
+
+: bench.  ( d -- )  d. ." seconds"  ;
+  \ Print the result _d_.
+
+: }bench.  ( -- )  }bench bench.  ;
+  \ Stop timing and print the result.
+
+\ vim: filetype=superforthsfera

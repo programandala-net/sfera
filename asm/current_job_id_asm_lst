@@ -45,7 +45,7 @@
 
 00001C 341F               move.w (sp)+,d2   ; restore the SuperForth TOS
 00001E 205F               move.l (sp)+,a0   ; restore the SuperForth a0
-000020                    push_l d1         ; result
+000020                    push_d d1         ; result
 
 000028                    next
 

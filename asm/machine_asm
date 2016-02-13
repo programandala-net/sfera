@@ -66,7 +66,7 @@
   ; a0 = addresss of system variables
   move.b  sys_mtyp(a0),d0
   and.w   #31,d0
-  push_w  d0               ; to the Forth stack
+  push_n  d0               ; to the Forth stack
   move.l  (sp)+,a0         ; restore SuperForth's a0
   next
 
