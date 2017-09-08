@@ -1,6 +1,6 @@
 = Sfera versions history
 :author: Marcos Cruz (programandala.net)
-:revdate: 2016-02-13
+:revdate: 2017-09-09
 
 // This file is part of Sfera, a library for SuperForth
 // http://programandala.net/en.program.sfera.html
@@ -108,3 +108,6 @@ Other changes:
 - New: `ununderscore`, a tool for renaming the original words of
   SuperForth.
  
+== 0.3.1+20170909
+
+- Fix source corruption in the `tuck` module.

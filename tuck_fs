@@ -3,7 +3,7 @@
 \ This file is part of Sfera, a library for SuperForth
 \ http://programandala.net/en.program.sfera.html
 
-\ Author: Marcos Cruz (programandala.net), 2016
+\ Author: Marcos Cruz (programandala.net), 2016, 2017
 
 \ ==============================================================
 \ License
@@ -17,9 +17,11 @@
 \ History
 
 \ 2016-02-08: Start.
+\ 2017-09-08: Fix layout.
 
 \ ==============================================================
 
 require include_code_fs
-r
-\ vim: filetype=superforthsferaequire-code tuck_bin
+require-code tuck_bin
+
+\ vim: filetype=superforthsfera
